@@ -1,0 +1,19 @@
+{
+  "name": "random",
+  "version": "1.0.0",
+  "description": "Random - Test 1",
+  "main": "app.js",
+  "repository": "https://github.com/timothyhalley/skicyclerun.sam/skicyclerunAPI/random",
+  "author": "SKICYCLERUN",
+  "license": "MIT",
+  "dependencies": {
+    "uuid": "latest"
+  },
+  "scripts": {
+    "test": "mocha tests/unit/"
+  },
+  "devDependencies": {
+    "chai": "latest",
+    "mocha": "latest"
+  }
+}

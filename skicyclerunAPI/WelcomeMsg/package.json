@@ -1,0 +1,19 @@
+{
+  "name": "welcome",
+  "version": "1.0.0",
+  "description": "Welcome - Test 1",
+  "main": "app.js",
+  "repository": "https://github.com/timothyhalley/skicyclerun.sam/skicyclerunAPI/welcome",
+  "author": "SKICYCLERUN",
+  "license": "MIT",
+  "dependencies": {
+    "fortune-messages": "latest"
+  },
+  "scripts": {
+    "test": "mocha tests/unit/"
+  },
+  "devDependencies": {
+    "chai": "latest",
+    "mocha": "latest"
+  }
+}

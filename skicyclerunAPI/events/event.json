@@ -1,0 +1,10 @@
+{
+    "queryStringParameters": {
+        "bucketName": "skicyclerun.lib",
+        "testKey": "Andrea&J.jpeg",
+        "albumRepo": "albums",
+        "albumPath": "albums/tokyo/",
+        "sitePhotos": "skicyclerun",
+        "greeter": "Vendikai!"
+    }
+}

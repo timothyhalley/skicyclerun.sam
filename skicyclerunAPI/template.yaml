@@ -1,0 +1,130 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: |
+  skicyclerunAPI: function library
+Globals:
+  Function:
+    Timeout: 3
+Resources:
+  EchoEchoFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: EchoEcho/
+      Handler: app.lambdaHandler
+      Runtime: nodejs20.x
+      Architectures:
+        - arm64
+      Role: arn:aws:iam::635874589224:role/service-role/skicyclerun_www_lambda_apex_role
+      Policies:
+        - LambdaInvokePolicy
+      Events:
+        Welcome:
+          Type: Api
+          Properties:
+            Path: /echoecho
+            Method: get
+      MemorySize: 3008
+      Timeout: 30
+
+  WelcomeMsgFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: WelcomeMsg/
+      Handler: app.lambdaHandler
+      Runtime: nodejs20.x
+      Architectures:
+        - arm64
+      Role: arn:aws:iam::635874589224:role/service-role/skicyclerun_www_lambda_apex_role
+      Policies:
+        - LambdaInvokePolicy
+      Events:
+        Welcome:
+          Type: Api
+          Properties:
+            Path: /welcome
+            Method: get
+      MemorySize: 3008
+      Timeout: 30
+
+  RandomFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: RandomNumber/
+      Handler: app.lambdaHandler
+      Runtime: nodejs20.x
+      Architectures:
+        - arm64
+      Role: arn:aws:iam::635874589224:role/service-role/skicyclerun_www_lambda_apex_role
+      Policies:
+        - LambdaInvokePolicy
+      Events:
+        Welcome:
+          Type: Api
+          Properties:
+            Path: /random
+            Method: get
+      MemorySize: 3008
+      Timeout: 30
+
+  GetBucketKeyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: getBucketKey/
+      Handler: app.lambdaHandler
+      Runtime: nodejs20.x
+      Architectures:
+        - arm64
+      Role: arn:aws:iam::635874589224:role/service-role/skicyclerun_www_lambda_apex_role
+      Policies:
+        - LambdaInvokePolicy
+        - S3ReadPolicy
+      Events:
+        Welcome:
+          Type: Api
+          Properties:
+            Path: /getkey
+            Method: get
+      MemorySize: 3008
+      Timeout: 30
+
+  GetAlbumsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: getAlbums/
+      Handler: app.lambdaHandler
+      Runtime: nodejs20.x
+      Architectures:
+        - arm64
+      Role: arn:aws:iam::635874589224:role/service-role/skicyclerun_www_lambda_apex_role
+      Policies:
+        - LambdaInvokePolicy
+        - S3ReadPolicy
+      Events:
+        Welcome:
+          Type: Api
+          Properties:
+            Path: /getalbums
+            Method: get
+      MemorySize: 3008
+      Timeout: 30
+
+  GetAlbumPhotosFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: getPhotos/
+      Handler: app.lambdaHandler
+      Runtime: nodejs20.x
+      Architectures:
+        - arm64
+      Role: arn:aws:iam::635874589224:role/service-role/skicyclerun_www_lambda_apex_role
+      Policies:
+        - LambdaInvokePolicy
+        - S3ReadPolicy
+      Events:
+        Welcome:
+          Type: Api
+          Properties:
+            Path: /getphotos
+            Method: get
+      MemorySize: 3008
+      Timeout: 30

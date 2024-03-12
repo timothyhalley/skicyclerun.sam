@@ -1,0 +1,20 @@
+{
+  "name": "getbucketkey",
+  "version": "1.0.0",
+  "description": "get Bucket Info - test",
+  "main": "app.js",
+  "repository": "https://github.com/timothyhalley/skicyclerun.sam/skicyclerunAPI/getbucketkey",
+  "author": "SKICYCLERUN",
+  "license": "MIT",
+  "dependencies": {
+    "@aws-sdk/client-s3": "latest",
+    "uuid": "latest"
+  },
+  "scripts": {
+    "test": "mocha tests/unit/"
+  },
+  "devDependencies": {
+    "chai": "latest",
+    "mocha": "latest"
+  }
+}

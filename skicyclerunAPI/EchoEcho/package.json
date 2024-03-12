@@ -1,0 +1,17 @@
+{
+  "name": "echoecho",
+  "version": "1.0.0",
+  "description": "EchoEcho - Test 1",
+  "main": "app.js",
+  "repository": "https://github.com/timothyhalley/skicyclerun.sam/skicyclerunAPI/echoecho",
+  "author": "SKICYCLERUN",
+  "license": "MIT",
+  "dependencies": {},
+  "scripts": {
+    "test": "mocha tests/unit/"
+  },
+  "devDependencies": {
+    "chai": "latest",
+    "mocha": "latest"
+  }
+}
