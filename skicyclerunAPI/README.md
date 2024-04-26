@@ -1,5 +1,17 @@
 # skicyclerunAPI
 
+-- Quick commands:
+
+  Validate YAML
+  * sam validate
+
+  Build & Test:
+  * sam build; clear; sam local invoke --event events/event.json GetAlbumPhotosRNDFunction --profile AdministratorAccess-635874589224
+
+  Deploy:
+  * sam build; clear; sam deploy --profile AdministratorAccess-635874589224
+
+-- Detail reference
 This project contains source code and supporting files for a serverless application that you can deploy with the SAM CLI. It includes the following files and folders.
 
 - welcome - Code for the application's Lambda function.

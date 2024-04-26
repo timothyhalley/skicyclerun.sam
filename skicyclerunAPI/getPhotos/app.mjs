@@ -3,6 +3,9 @@
 // Deploy to AWS:
 // sam deploy  --profile AdministratorAccess-635874589224
 
+// https://api.skicyclerun.com/getphotos?bucketName=skicyclerun.lib&albumPath=albums/tokyo/
+
+
 import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { getParams } from './params.mjs';
 

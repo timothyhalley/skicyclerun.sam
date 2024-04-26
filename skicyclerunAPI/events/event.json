@@ -3,8 +3,9 @@
         "bucketName": "skicyclerun.lib",
         "testKey": "Andrea&J.jpeg",
         "albumRepo": "albums",
-        "albumPath": "albums/tokyo/",
+        "albumPath": "albums/svgphotos/",
         "sitePhotos": "skicyclerun",
-        "greeter": "Vendikai!"
+        "greeter": "Vendikai!",
+        "numPhotos": 6
     }
 }

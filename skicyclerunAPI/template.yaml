@@ -128,3 +128,24 @@ Resources:
             Method: get
       MemorySize: 3008
       Timeout: 30
+
+  GetAlbumPhotosRNDFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: getPhotosRandom/
+      Handler: app.lambdaHandler
+      Runtime: nodejs20.x
+      Architectures:
+        - arm64
+      Role: arn:aws:iam::635874589224:role/service-role/skicyclerun_www_lambda_apex_role
+      Policies:
+        - LambdaInvokePolicy
+        - S3ReadPolicy
+      Events:
+        Welcome:
+          Type: Api
+          Properties:
+            Path: /getphotosrandom
+            Method: get
+      MemorySize: 3008
+      Timeout: 30
