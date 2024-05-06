@@ -3,7 +3,7 @@
         "bucketName": "skicyclerun.lib",
         "testKey": "Andrea&J.jpeg",
         "albumRepo": "albums",
-        "albumPath": "albums/localPics/",
+        "albumPath": "albums/default/",
         "sitePhotos": "skicyclerun",
         "greeter": "Vendikai!",
         "numPhotos": 6

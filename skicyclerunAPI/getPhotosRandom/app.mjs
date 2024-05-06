@@ -33,54 +33,59 @@ export const lambdaHandler = async (event, context) => {
   // List objects in the subfolder
   try {
     const response = await client.send(command);
-    console.log("RESPONSE: \n", response.Contents)
-    if (response.Contents !== undefined) {
 
-      const keys = response.Contents.map((object) => object.Key)
-      const ifPhoto = new RegExp(/\.(jpe?g|gif|png|svg)$/i)
+    if (response.$metadata.httpStatusCode == 200) {
 
-      let photo_list = [];
+      if (response.Contents !== undefined) {
 
-      for (const key in keys) {
-        let apiKeyItem = keys[key]
-        if (ifPhoto.test(apiKeyItem)) {
-          // photoAPI[key] = apiKeyItem
-          photo_list.push(apiKeyItem)
+        const keys = response.Contents.map((object) => object.Key)
+        const ifPhoto = new RegExp(/\.(jpe?g|gif|png|svg)$/i)
+
+        let photo_list = [];
+
+        for (const key in keys) {
+          let apiKeyItem = keys[key]
+          if (ifPhoto.test(apiKeyItem)) {
+            // photoAPI[key] = apiKeyItem
+            photo_list.push(apiKeyItem)
+          }
         }
+
+        // randomize and slice array down to size
+        const photo_random = getRandomItemsFromArray(photo_list, numPhotos)
+
+        // modify array entries to be fully qualified URL/URI
+        const prefix = "https://lib.skicyclerun.com/"
+        const photos_full = photo_random.map((element) => prefix + element);
+
+        // return response;
+        const httpSC = response.$metadata.httpStatusCode
+        const resJSON = {
+          "isBase64Encoded": false,
+          "statusCode": httpSC,
+          "headers": {
+            "function": "getPhotos",
+            "Content-Type": "application/json",
+            "bucket": bucketName,
+            "album": albumPath
+          },
+        };
+
+        resJSON.body = JSON.stringify(photos_full)
+
+        return resJSON
+      } else {
+        // empty response likely due to unknown folder or empty folder
+        console.log("[WARNING]: No data found in album")
       }
 
-      // randomize and slice array down to size
-      const photo_random = getRandomItemsFromArray(photo_list, numPhotos)
-
-      // modify array entries to be fully qualified URL/URI
-      const prefix = "https://lib.skicyclerun.com/"
-      const photos_full = photo_random.map((element) => prefix + element);
-      // console.log("[DEBUG] New photo array: \n", photos_full)
-
-      // return response;
-      const httpSC = response.$metadata.httpStatusCode
-      const resJSON = {
-        "isBase64Encoded": false,
-        "statusCode": httpSC,
-        "headers": {
-          "function": "getPhotos",
-          "Content-Type": "application/json",
-          "bucket": bucketName,
-          "album": albumPath
-        },
-      };
-
-      // resJSON.body = JSON.stringify(photoAPI)
-      resJSON.body = JSON.stringify(photos_full)
-
-      return resJSON
     } else {
+      console.log("[ERROR]: failure to reach API]", response.$metadata.httpStatusCode)
       return null
     }
 
-
   } catch (error) {
-    console.error("[ERROR] getPhoto API: Error listing objects:\n", error);
+    console.error("[ERROR] getPhotosRandom API:\n", error);
   }
 
 };
