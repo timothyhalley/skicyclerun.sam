@@ -11,6 +11,11 @@
   Deploy:
   * sam build; clear; sam deploy --profile AdministratorAccess-635874589224
 
+  Invalidate Cache
+  * Note: setup credentials via `aws configure`
+  * aws cloudfront create-invalidation --distribution-i E1GQ61X0LT69AR --paths "/*"
+  * aws cloudfront get-invalidation --id ABOVEIDINSERTHERE --distribution-id E1GQ61X0LT69AR
+
 -- Detail reference
 This project contains source code and supporting files for a serverless application that you can deploy with the SAM CLI. It includes the following files and folders.
 

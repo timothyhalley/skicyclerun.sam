@@ -52,7 +52,8 @@ export const lambdaHandler = async (event, context) => {
         }
 
         // randomize and slice array down to size
-        const photo_random = getRandomItemsFromArray(photo_list, numPhotos)
+        // const photo_random = getRandomItemsFromArray(photo_list, numPhotos)
+        const photo_random = shuffleArray(photo_list)
 
         // modify array entries to be fully qualified URL/URI
         const prefix = "https://lib.skicyclerun.com/"
@@ -93,4 +94,16 @@ export const lambdaHandler = async (event, context) => {
 function getRandomItemsFromArray(arr, count) {
   const shuffledArray = arr.slice().sort(() => Math.random() - 0.5);
   return shuffledArray.slice(0, count);
+}
+
+function shuffleArray(arr) {
+  const n = arr.length;
+  for (let i = n - 1; i > 0; i--) {
+    // Generate a random index between 0 and i (inclusive)
+    const j = Math.floor(Math.random() * (i + 1));
+
+    // Swap elements at indices i and j
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
 }

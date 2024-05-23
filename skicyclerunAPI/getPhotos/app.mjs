@@ -34,7 +34,7 @@ export const lambdaHandler = async (event, context) => {
     // console.log("RESPONSE: \n", response)
     const keys = response.Contents.map((object) => object.Key)
     const photoAPI = {};
-    const ifPhoto = new RegExp(/\.(jpe?g|gif|png)$/i)
+    const ifPhoto = new RegExp(/\.(jpe?g|gif|png|svg)$/i)
     for (const key in keys) {
       let apiKeyItem = keys[key]
       if (ifPhoto.test(apiKeyItem)) {
