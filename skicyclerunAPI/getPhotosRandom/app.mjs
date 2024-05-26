@@ -115,7 +115,7 @@ function shuffleArray(arr) {
 
 function extractNumericalPart(url) {
   // Extract the numerical part from the URL
-  const match = url.match(/(\d+)/);
+  const match = url.match(/\d{14}/);
   return match ? parseInt(match[0]) : null;
 }
 
@@ -131,6 +131,9 @@ function limitArrayWithUniqueValues(arr, limit) {
     const numericalValue = extractNumericalPart(url);
     if (numericalValue !== null) {
       uniqueValuesMap.set(numericalValue, url);
+    } else {
+      // Include URLs without numeric values directly
+      uniqueValuesMap.set(url, url);
     }
   }
 
