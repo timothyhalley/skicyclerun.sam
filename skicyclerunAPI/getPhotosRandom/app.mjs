@@ -58,6 +58,11 @@ export const lambdaHandler = async (event, context) => {
         // modify array entries to be fully qualified URL/URI
         const prefix = "https://lib.skicyclerun.com/"
         const photos_full = photo_random.map((element) => prefix + element);
+        const photos_unique = limitArrayWithUniqueValues(photos_full, numPhotos)
+
+        console.log("[DEBUG] - photos_full: ", photos_full)
+        console.log("[DEBUG]------------------\n\n\n------------------")
+        console.log("[DEBUG] - photos_unique: ", photos_unique)
 
         // return response;
         const httpSC = response.$metadata.httpStatusCode
@@ -72,7 +77,7 @@ export const lambdaHandler = async (event, context) => {
           },
         };
 
-        resJSON.body = JSON.stringify(photos_full)
+        resJSON.body = JSON.stringify(photos_unique)
 
         return resJSON
       } else {
@@ -106,4 +111,31 @@ function shuffleArray(arr) {
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
   return arr;
+}
+
+function extractNumericalPart(url) {
+  // Extract the numerical part from the URL
+  const match = url.match(/(\d+)/);
+  return match ? parseInt(match[0]) : null;
+}
+
+function limitArrayWithUniqueValues(arr, limit) {
+  // Ensure the limit is within the array length
+  const actualLimit = Math.min(limit, arr.length);
+
+  // Create a map to store unique numerical values
+  const uniqueValuesMap = new Map();
+
+  // Iterate through the array
+  for (const url of arr) {
+    const numericalValue = extractNumericalPart(url);
+    if (numericalValue !== null) {
+      uniqueValuesMap.set(numericalValue, url);
+    }
+  }
+
+  // Create a new array with the limited elements
+  const limitedArray = Array.from(uniqueValuesMap.values()).slice(0, actualLimit);
+
+  return limitedArray;
 }

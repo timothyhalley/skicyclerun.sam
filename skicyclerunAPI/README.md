@@ -6,6 +6,8 @@
   * sam validate
 
   Build & Test:
+  * Start Docker.APP
+  * Authenticate SKICYCLRUN via cmd: aws configure sso
   * sam build; clear; sam local invoke --event events/event.json GetAlbumPhotosRNDFunction --profile AdministratorAccess-635874589224
 
   Deploy:
