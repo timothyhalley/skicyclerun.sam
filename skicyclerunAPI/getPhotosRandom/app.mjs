@@ -60,9 +60,9 @@ export const lambdaHandler = async (event, context) => {
         const photos_full = photo_random.map((element) => prefix + element);
         const photos_unique = limitArrayWithUniqueValues(photos_full, numPhotos)
 
-        console.log("[DEBUG] - photos_full: ", photos_full)
-        console.log("[DEBUG]------------------\n\n\n------------------")
-        console.log("[DEBUG] - photos_unique: ", photos_unique)
+        // console.log("[DEBUG] - photos_full: ", photos_full)
+        // console.log("[DEBUG]------------------\n\n\n------------------")
+        // console.log("[DEBUG] - photos_unique: ", photos_unique)
 
         // return response;
         const httpSC = response.$metadata.httpStatusCode
