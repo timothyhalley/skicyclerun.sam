@@ -5,7 +5,38 @@ Description: |
 Globals:
   Function:
     Timeout: 3
+Parameters:
+  UserPoolArn:
+    Type: String
+    Description: ARN of the Cognito User Pool for authorizing protected routes
+  AllowedOrigins:
+    Type: String
+    Default: "https://skicyclerun.com,https://dev.skicyclerun.com,http://localhost:4321"
+    Description: Comma-separated list of allowed origins for CORS
+  ProtectedContentBucket:
+    Type: String
+    Description: S3 bucket name that stores protected post bodies
+  FunctionRoleArn:
+    Type: String
+    Default: arn:aws:iam::635874589224:role/service-role/skicyclerun_www_lambda_apex_role
+    Description: Existing IAM Role ARN for Lambda functions (if provided, SAM Policies are ignored)
 Resources:
+  PublicApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Cors:
+        AllowMethods: "'GET,OPTIONS'"
+        AllowHeaders: "'Authorization,Content-Type'"
+        AllowOrigin: "'*'"
+      Auth:
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: { Ref: UserPoolArn }
+            Identity:
+              Header: Authorization
+        DefaultAuthorizer: NONE
+
   EchoEchoFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -14,7 +45,7 @@ Resources:
       Runtime: nodejs20.x
       Architectures:
         - arm64
-      Role: arn:aws:iam::635874589224:role/service-role/skicyclerun_www_lambda_apex_role
+      Role: { Ref: FunctionRoleArn }
       Policies:
         - LambdaInvokePolicy
       Events:
@@ -23,6 +54,7 @@ Resources:
           Properties:
             Path: /echoecho
             Method: get
+            RestApiId: { Ref: PublicApi }
       MemorySize: 3008
       Timeout: 30
 
@@ -34,7 +66,7 @@ Resources:
       Runtime: nodejs20.x
       Architectures:
         - arm64
-      Role: arn:aws:iam::635874589224:role/service-role/skicyclerun_www_lambda_apex_role
+      Role: { Ref: FunctionRoleArn }
       Policies:
         - LambdaInvokePolicy
       Events:
@@ -43,6 +75,9 @@ Resources:
           Properties:
             Path: /welcome
             Method: get
+            RestApiId: { Ref: PublicApi }
+            Auth:
+              Authorizer: NONE
       MemorySize: 3008
       Timeout: 30
 
@@ -54,7 +89,7 @@ Resources:
       Runtime: nodejs20.x
       Architectures:
         - arm64
-      Role: arn:aws:iam::635874589224:role/service-role/skicyclerun_www_lambda_apex_role
+      Role: { Ref: FunctionRoleArn }
       Policies:
         - LambdaInvokePolicy
       Events:
@@ -63,6 +98,7 @@ Resources:
           Properties:
             Path: /random
             Method: get
+            RestApiId: { Ref: PublicApi }
       MemorySize: 3008
       Timeout: 30
 
@@ -74,7 +110,7 @@ Resources:
       Runtime: nodejs20.x
       Architectures:
         - arm64
-      Role: arn:aws:iam::635874589224:role/service-role/skicyclerun_www_lambda_apex_role
+      Role: { Ref: FunctionRoleArn }
       Policies:
         - LambdaInvokePolicy
         - S3ReadPolicy
@@ -84,6 +120,7 @@ Resources:
           Properties:
             Path: /getkey
             Method: get
+            RestApiId: { Ref: PublicApi }
       MemorySize: 3008
       Timeout: 30
 
@@ -95,7 +132,7 @@ Resources:
       Runtime: nodejs20.x
       Architectures:
         - arm64
-      Role: arn:aws:iam::635874589224:role/service-role/skicyclerun_www_lambda_apex_role
+      Role: { Ref: FunctionRoleArn }
       Policies:
         - LambdaInvokePolicy
         - S3ReadPolicy
@@ -105,6 +142,7 @@ Resources:
           Properties:
             Path: /getalbums
             Method: get
+            RestApiId: { Ref: PublicApi }
       MemorySize: 3008
       Timeout: 30
 
@@ -116,7 +154,7 @@ Resources:
       Runtime: nodejs20.x
       Architectures:
         - arm64
-      Role: arn:aws:iam::635874589224:role/service-role/skicyclerun_www_lambda_apex_role
+      Role: { Ref: FunctionRoleArn }
       Policies:
         - LambdaInvokePolicy
         - S3ReadPolicy
@@ -126,6 +164,7 @@ Resources:
           Properties:
             Path: /getphotos
             Method: get
+            RestApiId: { Ref: PublicApi }
       MemorySize: 3008
       Timeout: 30
 
@@ -137,7 +176,7 @@ Resources:
       Runtime: nodejs20.x
       Architectures:
         - arm64
-      Role: arn:aws:iam::635874589224:role/service-role/skicyclerun_www_lambda_apex_role
+      Role: { Ref: FunctionRoleArn }
       Policies:
         - LambdaInvokePolicy
         - S3ReadPolicy
@@ -147,5 +186,109 @@ Resources:
           Properties:
             Path: /getphotosrandom
             Method: get
+            RestApiId: { Ref: PublicApi }
       MemorySize: 3008
       Timeout: 30
+
+  StatusFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: Status/
+      Handler: app.lambdaHandler
+      Runtime: nodejs20.x
+      Architectures:
+        - arm64
+      Environment:
+        Variables:
+          ALLOWED_ORIGINS: { Ref: AllowedOrigins }
+      Events:
+        Status:
+          Type: Api
+          Properties:
+            Path: /status
+            Method: get
+            RestApiId: { Ref: PublicApi }
+            Auth:
+              Authorizer: NONE
+      MemorySize: 512
+      Timeout: 10
+
+  ProfileFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: Profile/
+      Handler: app.lambdaHandler
+      Runtime: nodejs20.x
+      Architectures:
+        - arm64
+      Environment:
+        Variables:
+          ALLOWED_ORIGINS: { Ref: AllowedOrigins }
+      Events:
+        Profile:
+          Type: Api
+          Properties:
+            Path: /profile
+            Method: get
+            RestApiId: { Ref: PublicApi }
+            Auth:
+              Authorizer: CognitoAuthorizer
+      MemorySize: 512
+      Timeout: 10
+
+  ProtectedPostsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ProtectedPosts/
+      Handler: app.lambdaHandler
+      Runtime: nodejs20.x
+      Architectures:
+        - arm64
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: { Ref: ProtectedPostsTable }
+        - S3ReadPolicy:
+            BucketName: { Ref: ProtectedContentBucket }
+      Environment:
+        Variables:
+          ALLOWED_ORIGINS: { Ref: AllowedOrigins }
+          PROTECTED_BUCKET: { Ref: ProtectedContentBucket }
+          PROTECTED_POSTS_TABLE: { Ref: ProtectedPostsTable }
+      Events:
+        List:
+          Type: Api
+          Properties:
+            Path: /protected/posts
+            Method: get
+            RestApiId: { Ref: PublicApi }
+            Auth:
+              Authorizer: CognitoAuthorizer
+        Detail:
+          Type: Api
+          Properties:
+            Path: /protected/posts/{slug}
+            Method: get
+            RestApiId: { Ref: PublicApi }
+            Auth:
+              Authorizer: CognitoAuthorizer
+      MemorySize: 1024
+      Timeout: 20
+
+  ProtectedPostsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: slug
+          AttributeType: S
+      KeySchema:
+        - AttributeName: slug
+          KeyType: HASH
+
+Outputs:
+  PublicApiBaseUrl:
+    Description: Base URL for the public API
+    Value:
+      Fn::Sub: "https://${PublicApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+    Export:
+      Name: PublicApiBaseUrl

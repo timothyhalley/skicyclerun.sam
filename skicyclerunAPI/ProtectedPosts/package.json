@@ -1,0 +1,12 @@
+{
+  "name": "protected-posts",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "app.mjs",
+  "license": "MIT",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3",
+    "@aws-sdk/lib-dynamodb": "^3",
+    "@aws-sdk/client-s3": "^3"
+  }
+}

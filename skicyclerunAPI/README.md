@@ -60,6 +60,54 @@ sam build
 sam deploy --guided
 ```
 
+## API endpoints (clean and small)
+
+Public:
+- GET /welcome — simple JSON to test connectivity.
+- GET /status — health endpoint.
+
+Authenticated (Cognito User Pool Authorizer, Authorization: Bearer <ID token>):
+- GET /profile — returns { sub, email, groups } from token claims.
+- GET /protected/posts — returns metadata list user can access (filtered by groups).
+- GET /protected/posts/{slug} — returns protected content if authorized.
+
+Storage:
+- S3 bucket stores protected content bodies (Markdown/HTML), keyed by slug.
+- DynamoDB table ProtectedPosts with items: { slug (PK), title, summary, requiredGroups (string set/array), s3Key }.
+
+CORS:
+- Allowed origins: https://skicyclerun.com and http://localhost:4321
+- Allow headers: Authorization, Content-Type
+- Methods: GET (OPTIONS preflight returns 200 by API Gateway)
+
+Deployment:
+- sam build && sam deploy --guided
+- Parameters prompted: UserPoolArn, AllowedOrigins, ProtectedContentBucket
+- Output: PublicApiBaseUrl (set as PUBLIC_API_BASE_URL in frontend)
+
+Client integration (Amplify)
+- Include Authorization: Bearer <ID token> for protected routes
+- Example:
+
+```ts
+import { generateClient } from 'aws-amplify/api';
+import { fetchAuthSession } from 'aws-amplify/auth';
+
+const client = generateClient({
+  authMode: 'userPool'
+});
+
+async function getProfile() {
+  const { tokens } = await fetchAuthSession();
+  const idToken = tokens?.idToken?.toString();
+  return client.get({
+    apiName: 'myApi',
+    path: '/profile',
+    options: { headers: { Authorization: `Bearer ${idToken}` } }
+  });
+}
+```
+
 The first command will build the source of your application. The second command will package and deploy your application to AWS, with a series of prompts:
 
 * **Stack Name**: The name of the stack to deploy to CloudFormation. This should be unique to your account and region, and a good starting point would be something matching your project name.
