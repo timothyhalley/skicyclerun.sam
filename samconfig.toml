@@ -19,6 +19,7 @@ confirm_changeset = true
 resolve_s3 = false
 s3_prefix = "skicyclerunAPI"
 s3_bucket = "skicyclerun.sam"
+parameter_overrides = "ProtectedContentBucket=skicyclerun.lib UserPoolArn=arn:aws:cognito-idp:us-west-2:635874589224:userpool/us-west-2_UqZZY2Hbw"
 
 [default.package.parameters]
 resolve_s3 = false

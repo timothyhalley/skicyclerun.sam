@@ -35,7 +35,6 @@ Resources:
             UserPoolArn: { Ref: UserPoolArn }
             Identity:
               Header: Authorization
-        DefaultAuthorizer: NONE
 
   EchoEchoFunction:
     Type: AWS::Serverless::Function
@@ -76,8 +75,6 @@ Resources:
             Path: /welcome
             Method: get
             RestApiId: { Ref: PublicApi }
-            Auth:
-              Authorizer: NONE
       MemorySize: 3008
       Timeout: 30
 
@@ -105,7 +102,7 @@ Resources:
   GetBucketKeyFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: getBucketKey/
+      CodeUri: getBucketkey/
       Handler: app.lambdaHandler
       Runtime: nodejs20.x
       Architectures:
@@ -208,8 +205,6 @@ Resources:
             Path: /status
             Method: get
             RestApiId: { Ref: PublicApi }
-            Auth:
-              Authorizer: NONE
       MemorySize: 512
       Timeout: 10
 
