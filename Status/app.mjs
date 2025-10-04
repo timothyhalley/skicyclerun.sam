@@ -1,15 +1,15 @@
+const CORS_HEADERS = {
+  "Content-Type": "application/json",
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "Content-Type,Authorization",
+  "Access-Control-Allow-Methods": "GET,OPTIONS",
+};
+
 export const lambdaHandler = async (event) => {
-  const origin = event?.headers?.origin || event?.headers?.Origin;
-  const allowed = (process.env.ALLOWED_ORIGINS || "").split(",");
-  const allow = origin && allowed.includes(origin) ? origin : allowed[0] || "*";
+  const origin = null;
   return {
     statusCode: 200,
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": allow,
-      "Access-Control-Allow-Headers": "Authorization, Content-Type",
-      "Access-Control-Allow-Methods": "GET,OPTIONS",
-    },
+    headers: CORS_HEADERS,
     body: JSON.stringify({ ok: true, ts: Date.now() }),
   };
 };

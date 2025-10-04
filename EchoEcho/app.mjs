@@ -12,17 +12,22 @@
 // curl "https://api.skicyclerun.com/dev/echoecho"
 //
 import { greet } from "./greet.mjs";
+const CORS_HEADERS = {
+  "Content-Type": "application/json",
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "Content-Type,Authorization",
+  "Access-Control-Allow-Methods": "GET,OPTIONS",
+};
 
 export const lambdaHandler = async (event, context) => {
+  const origin = null;
   // Get params from API call
   // https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html?icmpid=apigateway_console#api-gateway-simple-proxy-for-lambda-input-format
   const queryParams = event.queryStringParameters || {};
 
   var res = {
     statusCode: 200,
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: CORS_HEADERS,
   };
 
   // Get the 'name' or 'greeter' query parameter, default to 'NoNotMe' if not provided

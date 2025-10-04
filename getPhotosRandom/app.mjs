@@ -5,19 +5,33 @@
 // Deploy to AWS:
 // * sam deploy  --profile AdministratorAccess-635874589224
 
-// https://api.skicyclerun.com/getphotos?bucketName=skicyclerun.lib&albumPath=albums/svgphotos/&numPhotos=6
+// # Test a valid album
+// curl -i "https://api.skicyclerun.com/dev/getphotosrandom?bucketName=skicyclerun.lib&albumPath=albums/tokyo/&numPhotos=5"
 
+// # Test a non-existent album (should now return 200 OK with an empty array)
+// curl -i "https://api.skicyclerun.com/dev/getphotosrandom?bucketName=skicyclerun.lib&albumPath=albums/non-existent-album/&numPhotos=5"
 
 import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
-import { getParams } from './params.mjs';
+import { getParams } from "./params.mjs";
+const CORS_HEADERS = {
+  "Content-Type": "application/json",
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "Content-Type,Authorization",
+  "Access-Control-Allow-Methods": "GET,OPTIONS",
+};
 
 export const lambdaHandler = async (event, context) => {
-
+  const origin = null; // not used with static CORS
   // setup AWS
   const client = new S3Client({ region: "us-west-2" });
 
   //get bucketName from JSON
-  let [bucketName, albumPath, numPhotos] = getParams(event, 'skicyclerun.lib', 'albums/default', 10);
+  let [bucketName, albumPath, numPhotos] = getParams(
+    event,
+    "skicyclerun.lib",
+    "albums/default",
+    10
+  );
 
   // console.log("[DEBUG] - bucket and folder: 🪣 ", bucketName, " 💿 ", albumPath, " ☝️ ", numPhotos)
 
@@ -25,8 +39,8 @@ export const lambdaHandler = async (event, context) => {
   const input = {
     Bucket: bucketName, // required
     Prefix: albumPath,
-    Delimiter: '/',
-    EncodingType: "url"
+    Delimiter: "/",
+    EncodingType: "url",
   };
   const command = new ListObjectsV2Command(input);
 
@@ -35,65 +49,75 @@ export const lambdaHandler = async (event, context) => {
     const response = await client.send(command);
 
     if (response.$metadata.httpStatusCode == 200) {
-
       if (response.Contents !== undefined) {
-
-        const keys = response.Contents.map((object) => object.Key)
-        const ifPhoto = new RegExp(/\.(jpe?g|gif|png|svg)$/i)
+        const keys = response.Contents.map((object) => object.Key);
+        const ifPhoto = new RegExp(/\.(jpe?g|gif|png|svg)$/i);
 
         let photo_list = [];
 
         for (const key in keys) {
-          let apiKeyItem = keys[key]
+          let apiKeyItem = keys[key];
           if (ifPhoto.test(apiKeyItem)) {
-            // photoAPI[key] = apiKeyItem
-            photo_list.push(apiKeyItem)
+            photo_list.push(apiKeyItem);
           }
         }
 
-        // randomize and slice array down to size
-        // const photo_random = getRandomItemsFromArray(photo_list, numPhotos)
-        const photo_random = shuffleArray(photo_list)
-
-        // modify array entries to be fully qualified URL/URI
-        const prefix = "https://lib.skicyclerun.com/"
+        const photo_random = shuffleArray(photo_list);
+        const prefix = "https://lib.skicyclerun.com/";
         const photos_full = photo_random.map((element) => prefix + element);
-        const photos_unique = limitArrayWithUniqueValues(photos_full, numPhotos)
+        const photos_unique = limitArrayWithUniqueValues(
+          photos_full,
+          numPhotos
+        );
 
-        // console.log("[DEBUG] - photos_full: ", photos_full)
-        // console.log("[DEBUG]------------------\n\n\n------------------")
-        // console.log("[DEBUG] - photos_unique: ", photos_unique)
-
-        // return response;
-        const httpSC = response.$metadata.httpStatusCode
+        const httpSC = response.$metadata.httpStatusCode;
         const resJSON = {
-          "isBase64Encoded": false,
-          "statusCode": httpSC,
-          "headers": {
-            "function": "getPhotos",
-            "Content-Type": "application/json",
-            "bucket": bucketName,
-            "album": albumPath
+          isBase64Encoded: false,
+          statusCode: httpSC,
+          headers: {
+            ...CORS_HEADERS,
+            function: "getPhotosRandom", // Updated function name
+            bucket: bucketName,
+            album: albumPath,
           },
         };
 
-        resJSON.body = JSON.stringify(photos_unique)
+        resJSON.body = JSON.stringify(photos_unique);
 
-        return resJSON
+        return resJSON;
       } else {
-        // empty response likely due to unknown folder or empty folder
-        console.log("[WARNING]: No data found in album")
+        // Handle empty folder: return 200 OK with an empty array
+        console.log("[WARNING]: No data found in album");
+        return {
+          statusCode: 200,
+          headers: CORS_HEADERS,
+          body: JSON.stringify([]),
+        };
       }
-
     } else {
-      console.log("[ERROR]: failure to reach API]", response.$metadata.httpStatusCode)
-      return null
+      console.log(
+        "[ERROR]: failure to reach API]",
+        response.$metadata.httpStatusCode
+      );
+      // Return a proper error response if S3 call fails
+      return {
+        statusCode: response.$metadata.httpStatusCode || 500,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: "Failed to retrieve data from S3" }),
+      };
     }
-
   } catch (error) {
     console.error("[ERROR] getPhotosRandom API:\n", error);
+    // Catch all other errors and return a valid 500 response
+    return {
+      statusCode: 500,
+      headers: CORS_HEADERS,
+      body: JSON.stringify({
+        error: "Internal Server Error",
+        message: error.message,
+      }),
+    };
   }
-
 };
 
 function getRandomItemsFromArray(arr, count) {
@@ -138,7 +162,10 @@ function limitArrayWithUniqueValues(arr, limit) {
   }
 
   // Create a new array with the limited elements
-  const limitedArray = Array.from(uniqueValuesMap.values()).slice(0, actualLimit);
+  const limitedArray = Array.from(uniqueValuesMap.values()).slice(
+    0,
+    actualLimit
+  );
 
   return limitedArray;
 }

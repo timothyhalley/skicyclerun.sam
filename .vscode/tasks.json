@@ -1,0 +1,60 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "SAM build and deploy",
+			"type": "shell",
+			"command": "sam build && sam deploy --profile skicyclerun_dev",
+			"problemMatcher": [
+				"$eslint-stylish"
+			]
+		},
+		{
+			"label": "SAM build and deploy",
+			"type": "shell",
+			"command": "sam build && sam deploy --profile skicyclerun_dev",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "SAM build and deploy",
+			"type": "shell",
+			"command": "sam build && sam deploy --profile skicyclerun_dev",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "SAM build and deploy",
+			"type": "shell",
+			"command": "sam build && sam deploy --profile skicyclerun_dev",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "SAM build and deploy",
+			"type": "shell",
+			"command": "sam build && sam deploy --profile skicyclerun_dev",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "SAM build and deploy",
+			"type": "shell",
+			"command": "sam build --cached && sam deploy --no-confirm-changeset --resolve-s3 --capabilities CAPABILITY_IAM --parameter-overrides \"ProtectedContentBucket=skicyclerun.lib UserPoolArn=arn:aws:cognito-idp:us-west-2:635874589224:userpool/us-west-2_UqZZY2Hbw\"",
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
+		},
+		{
+			"label": "SAM build (clean)",
+			"type": "shell",
+			"command": "rm -rf .aws-sam && sam build",
+			"group": "build"
+		}
+	]
+}

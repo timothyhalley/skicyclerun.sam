@@ -5,63 +5,92 @@
 
 // https://api.skicyclerun.com/getphotos?bucketName=skicyclerun.lib&albumPath=albums/tokyo/
 
-
 import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
-import { getParams } from './params.mjs';
+import { getParams } from "./params.mjs";
+const CORS_HEADERS = {
+  "Content-Type": "application/json",
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "Content-Type,Authorization",
+  "Access-Control-Allow-Methods": "GET,OPTIONS",
+};
 
 export const lambdaHandler = async (event, context) => {
-
+  const origin = null; // not used with static CORS
   // setup AWS
   const client = new S3Client({ region: "us-west-2" });
 
   //get bucketName from JSON
-  let [bucketName, albumPath] = getParams(event, 'skicyclerun.lib', 'albums/default');
+  let [bucketName, albumPath] = getParams(
+    event,
+    "skicyclerun.lib",
+    "albums/default"
+  );
 
-  console.log("[DEBUG] - bucket and folder: ", bucketName, albumPath)
+  console.log("[DEBUG] - bucket and folder: ", bucketName, albumPath);
 
   // Create the ListObjectsV2 command
   const input = {
     Bucket: bucketName, // required
     Prefix: albumPath,
-    Delimiter: '/',
-    EncodingType: "url"
+    Delimiter: "/",
+    EncodingType: "url",
   };
   const command = new ListObjectsV2Command(input);
 
   // List objects in the subfolder
   try {
     const response = await client.send(command);
-    // console.log("RESPONSE: \n", response)
-    const keys = response.Contents.map((object) => object.Key)
+
+    // Handle case where folder is empty
+    if (!response.Contents || response.Contents.length === 0) {
+      console.log("[INFO] No objects found in prefix:", albumPath);
+      return {
+        statusCode: 200,
+        headers: {
+          ...CORS_HEADERS,
+          bucket: bucketName,
+          album: albumPath,
+        },
+        body: JSON.stringify([]), // Return a 200 OK with an empty array
+      };
+    }
+
+    const keys = response.Contents.map((object) => object.Key);
     const photoAPI = {};
-    const ifPhoto = new RegExp(/\.(jpe?g|gif|png|svg)$/i)
+    const ifPhoto = new RegExp(/\.(jpe?g|gif|png|svg)$/i);
     for (const key in keys) {
-      let apiKeyItem = keys[key]
+      let apiKeyItem = keys[key];
       if (ifPhoto.test(apiKeyItem)) {
-        photoAPI[key] = apiKeyItem
+        photoAPI[key] = apiKeyItem;
       }
     }
-    // console.log("[INFO] New photo object: \n", photoAPI)
-    // return response;
-    const httpSC = response.$metadata.httpStatusCode
+
+    const httpSC = response.$metadata.httpStatusCode;
     const resJSON = {
-      "isBase64Encoded": false,
-      "statusCode": httpSC,
-      "headers": {
-        "function": "getPhotos",
-        "Content-Type": "application/json",
-        "bucket": bucketName,
-        "album": albumPath
+      isBase64Encoded: false,
+      statusCode: httpSC,
+      headers: {
+        ...CORS_HEADERS,
+        function: "getPhotos",
+        bucket: bucketName,
+        album: albumPath,
       },
     };
 
-    resJSON.body = JSON.stringify(photoAPI)
+    resJSON.body = JSON.stringify(photoAPI);
 
-    // console.log("resJSON\n", resJSON)
-    return resJSON
-
+    return resJSON;
   } catch (error) {
     console.error("[ERROR] getPhoto API: Error listing objects:\n", error);
+    // ALWAYS return a valid error response for API Gateway
+    return {
+      isBase64Encoded: false,
+      statusCode: 500,
+      headers: CORS_HEADERS,
+      body: JSON.stringify({
+        error: "Internal Server Error",
+        message: error.message,
+      }),
+    };
   }
-
 };

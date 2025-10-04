@@ -1,30 +1,25 @@
+const CORS_HEADERS = {
+  "Content-Type": "application/json",
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "Content-Type,Authorization",
+  "Access-Control-Allow-Methods": "GET,OPTIONS",
+};
+
 const ok = (origin, body) => ({
   statusCode: 200,
-  headers: {
-    "Content-Type": "application/json",
-    "Access-Control-Allow-Origin": origin,
-    "Access-Control-Allow-Headers": "Authorization, Content-Type",
-    "Access-Control-Allow-Methods": "GET,OPTIONS",
-  },
+  headers: CORS_HEADERS,
   body: JSON.stringify(body),
 });
 const err = (origin, code, message) => ({
   statusCode: code,
-  headers: {
-    "Content-Type": "application/json",
-    "Access-Control-Allow-Origin": origin,
-    "Access-Control-Allow-Headers": "Authorization, Content-Type",
-    "Access-Control-Allow-Methods": "GET,OPTIONS",
-  },
+  headers: CORS_HEADERS,
   body: JSON.stringify({ error: message }),
 });
 
 export const lambdaHandler = async (event) => {
-  const origin = event?.headers?.origin || event?.headers?.Origin;
-  const allowed = (process.env.ALLOWED_ORIGINS || "").split(",");
-  const allow = origin && allowed.includes(origin) ? origin : allowed[0] || "*";
+  const origin = null;
   const claims = event?.requestContext?.authorizer?.claims;
-  if (!claims) return err(allow, 401, "Unauthorized");
+  if (!claims) return err(origin, 401, "Unauthorized");
   let groups = [];
   const rawGroups = claims["cognito:groups"];
   if (Array.isArray(rawGroups)) {
@@ -36,5 +31,5 @@ export const lambdaHandler = async (event) => {
   }
   const sub = claims.sub || null;
   const email = claims.email || null;
-  return ok(allow, { sub, email, groups });
+  return ok(origin, { sub, email, groups });
 };

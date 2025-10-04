@@ -5,13 +5,20 @@ Description: |
 Globals:
   Function:
     Timeout: 3
+    Runtime: nodejs20.x
+    MemorySize: 3008
+    Environment:
+      Variables:
+        ALLOWED_ORIGINS: { Ref: AllowedOrigins }
+    
+
 Parameters:
   UserPoolArn:
     Type: String
     Description: ARN of the Cognito User Pool for authorizing protected routes
   AllowedOrigins:
     Type: String
-    Default: "https://skicyclerun.com,https://dev.skicyclerun.com,http://localhost:4321"
+    Default: "https://skicyclerun.com,https://dev.skicyclerun.com,http://localhost:4321,https://localhost:4321"
     Description: Comma-separated list of allowed origins for CORS
   ProtectedContentBucket:
     Type: String
@@ -20,7 +27,9 @@ Parameters:
     Type: String
     Default: arn:aws:iam::635874589224:role/service-role/skicyclerun_www_lambda_apex_role
     Description: Existing IAM Role ARN for Lambda functions (if provided, SAM Policies are ignored)
+
 Resources:
+
   PublicApi:
     Type: AWS::Serverless::Api
     Properties:
@@ -42,11 +51,7 @@ Resources:
       CodeUri: EchoEcho/
       Handler: app.lambdaHandler
       Runtime: nodejs20.x
-      Architectures:
-        - arm64
-      Role: { Ref: FunctionRoleArn }
-      Policies:
-        - LambdaInvokePolicy
+      # No explicit policies needed; SAM will create a basic execution role
       Events:
         Welcome:
           Type: Api
@@ -63,11 +68,7 @@ Resources:
       CodeUri: WelcomeMsg/
       Handler: app.lambdaHandler
       Runtime: nodejs20.x
-      Architectures:
-        - arm64
-      Role: { Ref: FunctionRoleArn }
-      Policies:
-        - LambdaInvokePolicy
+      # No explicit policies needed; SAM will create a basic execution role
       Events:
         Welcome:
           Type: Api
@@ -84,11 +85,7 @@ Resources:
       CodeUri: RandomNumber/
       Handler: app.lambdaHandler
       Runtime: nodejs20.x
-      Architectures:
-        - arm64
-      Role: { Ref: FunctionRoleArn }
-      Policies:
-        - LambdaInvokePolicy
+      # No explicit policies needed; SAM will create a basic execution role
       Events:
         Welcome:
           Type: Api
@@ -105,12 +102,9 @@ Resources:
       CodeUri: getBucketkey/
       Handler: app.lambdaHandler
       Runtime: nodejs20.x
-      Architectures:
-        - arm64
-      Role: { Ref: FunctionRoleArn }
       Policies:
-        - LambdaInvokePolicy
-        - S3ReadPolicy
+        - S3ReadPolicy:
+            BucketName: { Ref: ProtectedContentBucket }
       Events:
         Welcome:
           Type: Api
@@ -127,12 +121,9 @@ Resources:
       CodeUri: getAlbums/
       Handler: app.lambdaHandler
       Runtime: nodejs20.x
-      Architectures:
-        - arm64
-      Role: { Ref: FunctionRoleArn }
       Policies:
-        - LambdaInvokePolicy
-        - S3ReadPolicy
+        - S3ReadPolicy:
+            BucketName: { Ref: ProtectedContentBucket }
       Events:
         Welcome:
           Type: Api
@@ -149,12 +140,9 @@ Resources:
       CodeUri: getPhotos/
       Handler: app.lambdaHandler
       Runtime: nodejs20.x
-      Architectures:
-        - arm64
-      Role: { Ref: FunctionRoleArn }
       Policies:
-        - LambdaInvokePolicy
-        - S3ReadPolicy
+        - S3ReadPolicy:
+            BucketName: { Ref: ProtectedContentBucket }
       Events:
         Welcome:
           Type: Api
@@ -171,12 +159,9 @@ Resources:
       CodeUri: getPhotosRandom/
       Handler: app.lambdaHandler
       Runtime: nodejs20.x
-      Architectures:
-        - arm64
-      Role: { Ref: FunctionRoleArn }
       Policies:
-        - LambdaInvokePolicy
-        - S3ReadPolicy
+        - S3ReadPolicy:
+            BucketName: { Ref: ProtectedContentBucket }
       Events:
         Welcome:
           Type: Api
@@ -193,8 +178,6 @@ Resources:
       CodeUri: Status/
       Handler: app.lambdaHandler
       Runtime: nodejs20.x
-      Architectures:
-        - arm64
       Environment:
         Variables:
           ALLOWED_ORIGINS: { Ref: AllowedOrigins }
@@ -214,8 +197,6 @@ Resources:
       CodeUri: Profile/
       Handler: app.lambdaHandler
       Runtime: nodejs20.x
-      Architectures:
-        - arm64
       Environment:
         Variables:
           ALLOWED_ORIGINS: { Ref: AllowedOrigins }
@@ -237,8 +218,6 @@ Resources:
       CodeUri: ProtectedPosts/
       Handler: app.lambdaHandler
       Runtime: nodejs20.x
-      Architectures:
-        - arm64
       Policies:
         - DynamoDBReadPolicy:
             TableName: { Ref: ProtectedPostsTable }
@@ -279,6 +258,7 @@ Resources:
       KeySchema:
         - AttributeName: slug
           KeyType: HASH
+
 
 Outputs:
   PublicApiBaseUrl:
