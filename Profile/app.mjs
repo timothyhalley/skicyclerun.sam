@@ -19,17 +19,25 @@ const err = (origin, code, message) => ({
 export const lambdaHandler = async (event) => {
   const origin = null;
   const claims = event?.requestContext?.authorizer?.claims;
-  if (!claims) return err(origin, 401, "Unauthorized");
-  let groups = [];
-  const rawGroups = claims["cognito:groups"];
-  if (Array.isArray(rawGroups)) {
-    groups = rawGroups;
-  } else if (typeof rawGroups === "string" && rawGroups.trim().length > 0) {
-    groups = rawGroups.includes(",")
-      ? rawGroups.split(",").map((s) => s.trim())
-      : [rawGroups];
+  const emailParam = event?.queryStringParameters?.email;
+
+  if (!claims || !emailParam || claims.email !== emailParam) {
+    return err(origin, 401, "Unauthorized or mismatched email");
   }
+
+  const rawGroups = claims["cognito:groups"];
+  const groups = Array.isArray(rawGroups)
+    ? rawGroups
+    : typeof rawGroups === "string" && rawGroups.trim()
+    ? rawGroups.split(",").map((s) => s.trim())
+    : [];
+
   const sub = claims.sub || null;
   const email = claims.email || null;
-  return ok(origin, { sub, email, groups });
+
+  // Optional enrichment
+  const phone = claims.phone_number || null;
+  const geo = claims["custom:geo"] || null;
+
+  return ok(origin, { sub, email, groups, phone, geo });
 };
