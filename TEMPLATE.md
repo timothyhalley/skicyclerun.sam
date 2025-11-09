@@ -1,12 +1,4 @@
-* References
-
-
-
-
-
-
-
-
+# References
 
 <!-- Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function

@@ -51,7 +51,7 @@ export const lambdaHandler = async (event, context) => {
     if (response.$metadata.httpStatusCode == 200) {
       if (response.Contents !== undefined) {
         const keys = response.Contents.map((object) => object.Key);
-        const ifPhoto = new RegExp(/\.(jpe?g|gif|png|svg)$/i);
+        const ifPhoto = new RegExp(/\.(jpe?g|gif|png|svg|webp)$/i);
 
         let photo_list = [];
 

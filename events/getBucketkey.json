@@ -1,0 +1,7 @@
+{
+  "requestContext": { "http": { "method": "GET" } },
+  "queryStringParameters": {
+    "bucket": "skicyclerun.lib",
+    "key": "albums/album1/photo1.jpg"
+  }
+}

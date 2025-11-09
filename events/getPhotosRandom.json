@@ -1,0 +1,8 @@
+{
+  "requestContext": { "http": { "method": "GET" } },
+  "queryStringParameters": {
+    "bucketName": "skicyclerun.lib",
+    "albumPath": "albums/2025-YearInReview/",
+    "numPhotos": "5"
+  }
+}

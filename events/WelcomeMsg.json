@@ -1,0 +1,6 @@
+{
+  "requestContext": { "http": { "method": "GET" } },
+  "queryStringParameters": {
+    "name": "Tim"
+  }
+}
