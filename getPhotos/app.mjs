@@ -7,15 +7,14 @@
 
 import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { getParams } from "./params.mjs";
-const CORS_HEADERS = {
-  "Content-Type": "application/json",
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "Content-Type,Authorization",
-  "Access-Control-Allow-Methods": "GET,OPTIONS",
-};
+import { getCorsHeaders, handleOptionsRequest } from "./cors.mjs";
 
 export const lambdaHandler = async (event, context) => {
-  const origin = null; // not used with static CORS
+  const origin = event.headers?.origin || event.headers?.Origin;
+
+  if (event.httpMethod === "OPTIONS") {
+    return handleOptionsRequest(event);
+  }
   // setup AWS
   const client = new S3Client({ region: "us-west-2" });
 
@@ -47,7 +46,7 @@ export const lambdaHandler = async (event, context) => {
       return {
         statusCode: 200,
         headers: {
-          ...CORS_HEADERS,
+          ...getCorsHeaders(origin),
           bucket: bucketName,
           album: albumPath,
         },
@@ -70,7 +69,7 @@ export const lambdaHandler = async (event, context) => {
       isBase64Encoded: false,
       statusCode: httpSC,
       headers: {
-        ...CORS_HEADERS,
+        ...getCorsHeaders(origin),
         function: "getPhotos",
         bucket: bucketName,
         album: albumPath,
@@ -86,7 +85,7 @@ export const lambdaHandler = async (event, context) => {
     return {
       isBase64Encoded: false,
       statusCode: 500,
-      headers: CORS_HEADERS,
+      headers: getCorsHeaders(origin),
       body: JSON.stringify({
         error: "Internal Server Error",
         message: error.message,

@@ -34,10 +34,6 @@ Resources:
     Type: AWS::Serverless::Api
     Properties:
       StageName: Prod
-      Cors:
-        AllowMethods: "'GET,OPTIONS'"
-        AllowHeaders: "'Authorization,Content-Type'"
-        AllowOrigin: "'*'"
       Auth:
         Authorizers:
           CognitoAuthorizer:
@@ -59,6 +55,12 @@ Resources:
             Path: /echoecho
             Method: get
             RestApiId: { Ref: PublicApi }
+        WelcomeOptions:
+          Type: Api
+          Properties:
+            Path: /echoecho
+            Method: options
+            RestApiId: { Ref: PublicApi }
       MemorySize: 3008
       Timeout: 30
 
@@ -76,6 +78,12 @@ Resources:
             Path: /welcome
             Method: get
             RestApiId: { Ref: PublicApi }
+        WelcomeOptions:
+          Type: Api
+          Properties:
+            Path: /welcome
+            Method: options
+            RestApiId: { Ref: PublicApi }
       MemorySize: 3008
       Timeout: 30
 
@@ -92,6 +100,12 @@ Resources:
           Properties:
             Path: /random
             Method: get
+            RestApiId: { Ref: PublicApi }
+        WelcomeOptions:
+          Type: Api
+          Properties:
+            Path: /random
+            Method: options
             RestApiId: { Ref: PublicApi }
       MemorySize: 3008
       Timeout: 30
@@ -112,6 +126,12 @@ Resources:
             Path: /getkey
             Method: get
             RestApiId: { Ref: PublicApi }
+        WelcomeOptions:
+          Type: Api
+          Properties:
+            Path: /getkey
+            Method: options
+            RestApiId: { Ref: PublicApi }
       MemorySize: 3008
       Timeout: 30
 
@@ -130,6 +150,12 @@ Resources:
           Properties:
             Path: /getalbums
             Method: get
+            RestApiId: { Ref: PublicApi }
+        WelcomeOptions:
+          Type: Api
+          Properties:
+            Path: /getalbums
+            Method: options
             RestApiId: { Ref: PublicApi }
       MemorySize: 3008
       Timeout: 30
@@ -150,6 +176,12 @@ Resources:
             Path: /getphotos
             Method: get
             RestApiId: { Ref: PublicApi }
+        WelcomeOptions:
+          Type: Api
+          Properties:
+            Path: /getphotos
+            Method: options
+            RestApiId: { Ref: PublicApi }
       MemorySize: 3008
       Timeout: 30
 
@@ -168,6 +200,12 @@ Resources:
           Properties:
             Path: /getphotosrandom
             Method: get
+            RestApiId: { Ref: PublicApi }
+        WelcomeOptions:
+          Type: Api
+          Properties:
+            Path: /getphotosrandom
+            Method: options
             RestApiId: { Ref: PublicApi }
       MemorySize: 3008
       Timeout: 30
@@ -188,6 +226,12 @@ Resources:
             Path: /status
             Method: get
             RestApiId: { Ref: PublicApi }
+        StatusOptions:
+          Type: Api
+          Properties:
+            Path: /status
+            Method: options
+            RestApiId: { Ref: PublicApi }
       MemorySize: 512
       Timeout: 10
 
@@ -197,9 +241,17 @@ Resources:
       CodeUri: Profile/
       Handler: app.lambdaHandler
       Runtime: nodejs20.x
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - cognito-idp:AdminGetUser
+              Resource: { Ref: UserPoolArn }
       Environment:
         Variables:
           ALLOWED_ORIGINS: { Ref: AllowedOrigins }
+          USER_POOL_ID: "us-west-2_nkPiRBTSr"
       Events:
         Profile:
           Type: Api
@@ -209,6 +261,12 @@ Resources:
             RestApiId: { Ref: PublicApi }
             Auth:
               Authorizer: CognitoAuthorizer
+        ProfileOptions:
+          Type: Api
+          Properties:
+            Path: /profile
+            Method: options
+            RestApiId: { Ref: PublicApi }
       MemorySize: 512
       Timeout: 10
 
@@ -245,6 +303,18 @@ Resources:
             RestApiId: { Ref: PublicApi }
             Auth:
               Authorizer: CognitoAuthorizer
+        ListOptions:
+          Type: Api
+          Properties:
+            Path: /protected/posts
+            Method: options
+            RestApiId: { Ref: PublicApi }
+        DetailOptions:
+          Type: Api
+          Properties:
+            Path: /protected/posts/{slug}
+            Method: options
+            RestApiId: { Ref: PublicApi }
       MemorySize: 1024
       Timeout: 20
 

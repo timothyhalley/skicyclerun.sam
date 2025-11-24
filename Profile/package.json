@@ -3,5 +3,8 @@
   "version": "1.0.0",
   "type": "module",
   "main": "app.mjs",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.936.0"
+  }
 }

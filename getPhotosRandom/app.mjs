@@ -6,34 +6,37 @@
 // * sam deploy  --profile AdministratorAccess-635874589224
 
 // # Test a valid album
-// curl -i "https://api.skicyclerun.com/dev/getphotosrandom?bucketName=skicyclerun.lib&albumPath=albums/tokyo/&numPhotos=5"
+// curl -i "https://api.skicyclerun.com/v2/getphotosrandom?bucketName=skicyclerun.lib&albumPath=albums/tokyo/&numPhotos=5"
+
+// # Test with loraStyle filter
+// curl -i "https://api.skicyclerun.com/v2/getphotosrandom?bucketName=skicyclerun.lib&albumPath=albums/2025-YearInReview/&numPhotos=10&loraStyle=Gorillaz"
 
 // # Test a non-existent album (should now return 200 OK with an empty array)
-// curl -i "https://api.skicyclerun.com/dev/getphotosrandom?bucketName=skicyclerun.lib&albumPath=albums/non-existent-album/&numPhotos=5"
+// curl -i "https://api.skicyclerun.com/v2/getphotosrandom?bucketName=skicyclerun.lib&albumPath=albums/non-existent-album/&numPhotos=5"
 
 import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { getParams } from "./params.mjs";
-const CORS_HEADERS = {
-  "Content-Type": "application/json",
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "Content-Type,Authorization",
-  "Access-Control-Allow-Methods": "GET,OPTIONS",
-};
+import { getCorsHeaders, handleOptionsRequest } from "./cors.mjs";
 
 export const lambdaHandler = async (event, context) => {
-  const origin = null; // not used with static CORS
+  const origin = event.headers?.origin || event.headers?.Origin;
+
+  if (event.httpMethod === "OPTIONS") {
+    return handleOptionsRequest(event);
+  }
   // setup AWS
   const client = new S3Client({ region: "us-west-2" });
 
   //get bucketName from JSON
-  let [bucketName, albumPath, numPhotos] = getParams(
+  let [bucketName, albumPath, numPhotos, loraStyle] = getParams(
     event,
     "skicyclerun.lib",
     "albums/default",
-    10
+    10,
+    null
   );
 
-  // console.log("[DEBUG] - bucket and folder: 🪣 ", bucketName, " 💿 ", albumPath, " ☝️ ", numPhotos)
+  // console.log("[DEBUG] - bucket and folder: 🪣 ", bucketName, " 💿 ", albumPath, " ☝️ ", numPhotos, " 🎨 ", loraStyle)
 
   // Create the ListObjectsV2 command
   const input = {
@@ -58,7 +61,20 @@ export const lambdaHandler = async (event, context) => {
         for (const key in keys) {
           let apiKeyItem = keys[key];
           if (ifPhoto.test(apiKeyItem)) {
-            photo_list.push(apiKeyItem);
+            // If loraStyle is provided, filter by style (case-insensitive)
+            if (loraStyle) {
+              // Extract style from filename pattern: IMG_XXXX_StyleName_XXXXXXXX.ext
+              const styleMatch = apiKeyItem.match(/_([^_]+)_\d{8}\.\w+$/i);
+              if (styleMatch) {
+                const fileStyle = styleMatch[1];
+                if (fileStyle.toLowerCase() === loraStyle.toLowerCase()) {
+                  photo_list.push(apiKeyItem);
+                }
+              }
+            } else {
+              // No filter, include all photos
+              photo_list.push(apiKeyItem);
+            }
           }
         }
 
@@ -75,10 +91,11 @@ export const lambdaHandler = async (event, context) => {
           isBase64Encoded: false,
           statusCode: httpSC,
           headers: {
-            ...CORS_HEADERS,
-            function: "getPhotosRandom", // Updated function name
+            ...getCorsHeaders(origin),
+            function: "getPhotosRandom",
             bucket: bucketName,
             album: albumPath,
+            ...(loraStyle && { loraStyle: loraStyle }),
           },
         };
 
@@ -90,7 +107,7 @@ export const lambdaHandler = async (event, context) => {
         console.log("[WARNING]: No data found in album");
         return {
           statusCode: 200,
-          headers: CORS_HEADERS,
+          headers: getCorsHeaders(origin),
           body: JSON.stringify([]),
         };
       }
@@ -102,7 +119,7 @@ export const lambdaHandler = async (event, context) => {
       // Return a proper error response if S3 call fails
       return {
         statusCode: response.$metadata.httpStatusCode || 500,
-        headers: CORS_HEADERS,
+        headers: getCorsHeaders(origin),
         body: JSON.stringify({ error: "Failed to retrieve data from S3" }),
       };
     }
@@ -111,7 +128,7 @@ export const lambdaHandler = async (event, context) => {
     // Catch all other errors and return a valid 500 response
     return {
       statusCode: 500,
-      headers: CORS_HEADERS,
+      headers: getCorsHeaders(origin),
       body: JSON.stringify({
         error: "Internal Server Error",
         message: error.message,

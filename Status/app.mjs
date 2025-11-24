@@ -1,15 +1,15 @@
-const CORS_HEADERS = {
-  "Content-Type": "application/json",
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "Content-Type,Authorization",
-  "Access-Control-Allow-Methods": "GET,OPTIONS",
-};
+import { getCorsHeaders, handleOptionsRequest } from "./cors.mjs";
 
 export const lambdaHandler = async (event) => {
-  const origin = null;
+  const origin = event.headers?.origin || event.headers?.Origin;
+
+  if (event.httpMethod === "OPTIONS") {
+    return handleOptionsRequest(event);
+  }
+
   return {
     statusCode: 200,
-    headers: CORS_HEADERS,
+    headers: getCorsHeaders(origin),
     body: JSON.stringify({ ok: true, ts: Date.now() }),
   };
 };

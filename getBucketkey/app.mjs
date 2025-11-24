@@ -3,15 +3,14 @@
 
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { v4 as uuidv4 } from "uuid";
-const CORS_HEADERS = {
-  "Content-Type": "application/json",
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "Content-Type,Authorization",
-  "Access-Control-Allow-Methods": "GET,OPTIONS",
-};
+import { getCorsHeaders, handleOptionsRequest } from "./cors.mjs";
 
 export const lambdaHandler = async (event) => {
-  const origin = null;
+  const origin = event.headers?.origin || event.headers?.Origin;
+
+  if (event.httpMethod === "OPTIONS") {
+    return handleOptionsRequest(event);
+  }
   // setup AWS
   const client = new S3Client({ region: "us-west-2" });
 
@@ -35,7 +34,7 @@ export const lambdaHandler = async (event) => {
       statusCode: 200,
       isBase64Encoded: false,
       headers: {
-        ...CORS_HEADERS,
+        ...getCorsHeaders(origin),
         function: "getBucketKey",
         cypher: rNum,
         etag: response.ETag,
@@ -48,7 +47,7 @@ export const lambdaHandler = async (event) => {
     console.error(err);
     return {
       statusCode: 500,
-      headers: CORS_HEADERS,
+      headers: getCorsHeaders(origin),
       body: JSON.stringify({
         error: "Internal Server Error",
         message: err.message,

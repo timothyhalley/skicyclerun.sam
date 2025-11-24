@@ -6,12 +6,7 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { Readable } from "node:stream";
-const CORS_HEADERS = {
-  "Content-Type": "application/json",
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "Content-Type,Authorization",
-  "Access-Control-Allow-Methods": "GET,OPTIONS",
-};
+import { getCorsHeaders, handleOptionsRequest } from "./cors.mjs";
 
 const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 const s3 = new S3Client({});
@@ -40,7 +35,13 @@ const canAccess = (userGroups, requiredGroups) => {
 };
 
 export const lambdaHandler = async (event) => {
-  const corsHeaders = CORS_HEADERS;
+  const origin = event.headers?.origin || event.headers?.Origin;
+
+  if (event.httpMethod === "OPTIONS") {
+    return handleOptionsRequest(event);
+  }
+
+  const corsHeaders = getCorsHeaders(origin);
   const claims = event?.requestContext?.authorizer?.claims;
   if (!claims) {
     return {

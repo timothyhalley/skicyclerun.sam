@@ -5,15 +5,14 @@
 
 import { ListObjectsV2Command, S3Client } from "@aws-sdk/client-s3";
 import { getParams } from "./params.mjs";
-const CORS_HEADERS = {
-  "Content-Type": "application/json",
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "Content-Type,Authorization",
-  "Access-Control-Allow-Methods": "GET,OPTIONS",
-};
+import { getCorsHeaders, handleOptionsRequest } from "./cors.mjs";
 
 export const lambdaHandler = async (event, context) => {
-  const origin = null;
+  const origin = event.headers?.origin || event.headers?.Origin;
+
+  if (event.httpMethod === "OPTIONS") {
+    return handleOptionsRequest(event);
+  }
   // setup AWS
   const s3 = new S3Client({ region: "us-west-2" });
 
@@ -49,7 +48,7 @@ export const lambdaHandler = async (event, context) => {
       isBase64Encoded: false,
       statusCode: 200,
       headers: {
-        ...CORS_HEADERS,
+        ...getCorsHeaders(origin),
         function: "getAlbums",
       },
     };
@@ -62,7 +61,7 @@ export const lambdaHandler = async (event, context) => {
     console.error("[ERROR] getAlbums API: Error listing objects:", error);
     return {
       statusCode: 500,
-      headers: CORS_HEADERS,
+      headers: getCorsHeaders(origin),
       body: JSON.stringify({
         error: "Internal Server Error",
         message: error.message,
