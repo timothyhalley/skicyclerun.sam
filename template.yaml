@@ -5,7 +5,7 @@ Description: |
 Globals:
   Function:
     Timeout: 3
-    Runtime: nodejs20.x
+    Runtime: nodejs22.x
     MemorySize: 3008
     Environment:
       Variables:
@@ -46,7 +46,6 @@ Resources:
     Properties:
       CodeUri: EchoEcho/
       Handler: app.lambdaHandler
-      Runtime: nodejs20.x
       # No explicit policies needed; SAM will create a basic execution role
       Events:
         Welcome:
@@ -69,7 +68,6 @@ Resources:
     Properties:
       CodeUri: WelcomeMsg/
       Handler: app.lambdaHandler
-      Runtime: nodejs20.x
       # No explicit policies needed; SAM will create a basic execution role
       Events:
         Welcome:
@@ -92,7 +90,6 @@ Resources:
     Properties:
       CodeUri: RandomNumber/
       Handler: app.lambdaHandler
-      Runtime: nodejs20.x
       # No explicit policies needed; SAM will create a basic execution role
       Events:
         Welcome:
@@ -115,7 +112,6 @@ Resources:
     Properties:
       CodeUri: getBucketkey/
       Handler: app.lambdaHandler
-      Runtime: nodejs20.x
       Policies:
         - S3ReadPolicy:
             BucketName: { Ref: ProtectedContentBucket }
@@ -140,7 +136,6 @@ Resources:
     Properties:
       CodeUri: getAlbums/
       Handler: app.lambdaHandler
-      Runtime: nodejs20.x
       Policies:
         - S3ReadPolicy:
             BucketName: { Ref: ProtectedContentBucket }
@@ -165,7 +160,6 @@ Resources:
     Properties:
       CodeUri: getPhotos/
       Handler: app.lambdaHandler
-      Runtime: nodejs20.x
       Policies:
         - S3ReadPolicy:
             BucketName: { Ref: ProtectedContentBucket }
@@ -190,7 +184,6 @@ Resources:
     Properties:
       CodeUri: getPhotosRandom/
       Handler: app.lambdaHandler
-      Runtime: nodejs20.x
       Policies:
         - S3ReadPolicy:
             BucketName: { Ref: ProtectedContentBucket }
@@ -215,7 +208,6 @@ Resources:
     Properties:
       CodeUri: Status/
       Handler: app.lambdaHandler
-      Runtime: nodejs20.x
       Environment:
         Variables:
           ALLOWED_ORIGINS: { Ref: AllowedOrigins }
@@ -240,7 +232,6 @@ Resources:
     Properties:
       CodeUri: Profile/
       Handler: app.lambdaHandler
-      Runtime: nodejs20.x
       Policies:
         - Version: '2012-10-17'
           Statement:
@@ -275,7 +266,6 @@ Resources:
     Properties:
       CodeUri: ProtectedPosts/
       Handler: app.lambdaHandler
-      Runtime: nodejs20.x
       Policies:
         - DynamoDBReadPolicy:
             TableName: { Ref: ProtectedPostsTable }

@@ -1,11 +1,18 @@
 {
+  "httpMethod": "GET",
+  "headers": {
+    "origin": "https://localhost:4321"
+  },
   "requestContext": {
-    "http": { "method": "GET" },
     "authorizer": {
       "claims": {
-        "sub": "11111111-2222-3333-4444-555555555555",
+        "sub": "58313350-c0f1-70b9-349b-3f89143b537d",
         "email": "skicyclerun@gmail.com",
-        "cognito:groups": ["SuperDuperUsers"]
+        "email_verified": "true",
+        "cognito:username": "58313350-c0f1-70b9-349b-3f89143b537d",
+        "cognito:groups": ["SuperUsers"],
+        "zoneinfo": "usa/wa",
+        "auth_time": "1764026071"
       }
     }
   },
