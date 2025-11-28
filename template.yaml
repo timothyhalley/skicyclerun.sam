@@ -30,6 +30,36 @@ Parameters:
 
 Resources:
 
+  # CloudFront Function for URI rewriting (pretty URLs)
+  UriRewriteFunction:
+    Type: AWS::CloudFront::Function
+    Properties:
+      Name: skicyclerun-uri-rewrite
+      AutoPublish: true
+      FunctionCode: |
+        function handler(event) {
+          var request = event.request;
+          var uri = request.uri;
+
+          // Skip if already requesting a file with extension
+          if (uri.includes('.')) {
+            return request;
+          }
+
+          // Add index.html to directory requests
+          if (uri.endsWith('/')) {
+            request.uri += 'index.html';
+          } else {
+            // Add trailing slash and index.html for pretty URLs
+            request.uri += '/index.html';
+          }
+
+          return request;
+        }
+      FunctionConfig:
+        Comment: "Rewrite pretty URLs to index.html for skicyclerun.com"
+        Runtime: cloudfront-js-2.0
+
   PublicApi:
     Type: AWS::Serverless::Api
     Properties:
@@ -327,3 +357,9 @@ Outputs:
       Fn::Sub: "https://${PublicApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
     Export:
       Name: PublicApiBaseUrl
+
+  UriRewriteFunctionArn:
+    Description: ARN of the CloudFront URI rewrite function
+    Value: !GetAtt UriRewriteFunction.FunctionMetadata.FunctionARN
+    Export:
+      Name: UriRewriteFunctionArn
