@@ -18,7 +18,7 @@ Parameters:
     Description: ARN of the Cognito User Pool for authorizing protected routes
   AllowedOrigins:
     Type: String
-    Default: "https://skicyclerun.com,https://dev.skicyclerun.com,http://localhost:4321,https://localhost:4321"
+    Default: 'https://skicyclerun.com,https://dev.skicyclerun.com,http://localhost:4321,https://localhost:4321'
     Description: Comma-separated list of allowed origins for CORS
   ProtectedContentBucket:
     Type: String
@@ -340,6 +340,8 @@ Resources:
 
   ProtectedPostsTable:
     Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Properties:
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
@@ -348,13 +350,15 @@ Resources:
       KeySchema:
         - AttributeName: slug
           KeyType: HASH
+      SSESpecification:
+        SSEEnabled: true
 
 
 Outputs:
   PublicApiBaseUrl:
     Description: Base URL for the public API
     Value:
-      Fn::Sub: "https://${PublicApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+      Fn::Sub: 'https://${PublicApi}.execute-api.${AWS::Region}.amazonaws.com/Prod'
     Export:
       Name: PublicApiBaseUrl
 

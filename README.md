@@ -124,7 +124,7 @@ Public:
 - GET /welcome — simple JSON to test connectivity.
 - GET /status — health endpoint.
 
-Authenticated (Cognito User Pool Authorizer, Authorization: Bearer <ID token>):
+Authenticated (Cognito User Pool Authorizer, Authorization: Bearer `<ID token>`):
 
 - GET /profile — returns { sub, email, groups } from token claims.
 - GET /protected/posts — returns metadata list user can access (filtered by groups).
@@ -137,7 +137,7 @@ Storage:
 
 CORS:
 
-- Allowed origins: https://skicyclerun.com and http://localhost:4321
+- Allowed origins: <https://skicyclerun.com> and <http://localhost:4321>
 - Allow headers: Authorization, Content-Type
 - Methods: GET (OPTIONS preflight returns 200 by API Gateway)
 
@@ -261,12 +261,12 @@ Next, you can use AWS Serverless Application Repository to deploy ready to use A
 /\*\*
 
 -
-- Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
+- Event doc: <https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format>
 - @param {Object} event - API Gateway Lambda Proxy Input Format
 -
-- Context doc: https://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-context.html
+- Context doc: <https://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-context.html>
 - @param {Object} context
 -
-- Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
+- Return doc: <https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html>
 - @returns {Object} object - API Gateway Lambda Proxy Output Format
 - \*/
