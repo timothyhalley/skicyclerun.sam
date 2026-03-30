@@ -1,5 +1,5 @@
 #!/bin/bash
-# Upgrade npm packages for all Lambda functions
+# Audit all Lambda functions for vulnerabilities
 
 FUNCTIONS=(
   EchoEcho
@@ -16,14 +16,13 @@ FUNCTIONS=(
 
 for func in "${FUNCTIONS[@]}"; do
   if [ -d "$func" ] && [ -f "$func/package.json" ]; then
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "📦 Upgrading: $func"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    (cd "$func" && npm upgrade && npm audit fix --force)
     echo ""
-  else
-    echo "⚠️  Skipping $func (not found or no package.json)"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "🔍 AUDITING: $func"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    (cd "$func" && npm audit)
+    total=$(cd "$func" && npm audit --json 2>/dev/null | node -e 'let d="";process.stdin.on("data",c=>d+=c);process.stdin.on("end",()=>{try{const j=JSON.parse(d);console.log(j?.metadata?.vulnerabilities?.total ?? "ERR");}catch{console.log("ERR");}});' || echo "ERR")
+    echo "TOTAL: $total"
+    echo ""
   fi
 done
-
-echo "✅ All functions upgraded!"

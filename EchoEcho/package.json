@@ -6,12 +6,17 @@
   "repository": "https://github.com/timothyhalley/skicyclerun.sam/skicyclerunAPI/echoecho",
   "author": "SKICYCLERUN",
   "license": "MIT",
-  "dependencies": {},
   "scripts": {
     "test": "mocha tests/unit/"
   },
   "devDependencies": {
     "chai": "latest",
-    "mocha": "latest"
+    "mocha": "^11.3.0"
+  },
+  "overrides": {
+    "mocha": {
+      "serialize-javascript": "^7.0.5",
+      "diff": ">=8.0.3"
+    }
   }
 }
