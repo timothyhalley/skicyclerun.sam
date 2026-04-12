@@ -7,7 +7,6 @@ FUNCTIONS=(
   RandomNumber
   Status
   Profile
-  ProtectedPosts
   getAlbums
   getPhotos
   getPhotosRandom

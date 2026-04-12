@@ -563,68 +563,15 @@ describe("ProfileFunction", function () {
 
 ---
 
-## ProtectedPostsFunction (Protected)
-
-- Paths/Methods:
-  - GET /protected/posts (list)
-  - GET /protected/posts/{slug} (detail)
-- Purpose: List metadata or fetch protected post content from S3 with metadata in DynamoDB.
-- Query params: none (for list); path parameter `slug` (for detail)
-- Function ID: ProtectedPostsFunction
-- AWS access: Requires DynamoDB read and S3 read on protected bucket.
-
-Steps
-
-1. sam validate
-2. sam build
-3. Prepare list/detail event with claims and sam local invoke (below)
-
-Local invoke example
-
-```zsh
-sam local invoke ProtectedPostsFunction --event events/ProtectedPosts.json
-```
-
-Local API and curl (note: local gateway doesn’t enforce Cognito; function still requires claims, so prefer local invoke with mocked claims)
-
-```zsh
-# List
-curl "http://127.0.0.1:3000/protected/posts"
-# Detail
-curl "http://127.0.0.1:3000/protected/posts/my-post"
-```
-
-Unit test
-
-Create or update ProtectedPosts/tests/unit/test-handler.mjs:
-
-```javascript
-"use strict";
-import { lambdaHandler } from "../../app.mjs";
-import { expect } from "chai";
-const event = {
-  requestContext: {
-    http: { method: "GET" },
-    authorizer: {
-      claims: {
-        sub: "11111111-2222-3333-4444-555555555555",
-        email: "user@example.com",
-        "cognito:groups": ["members"],
-      },
-    },
-  },
-};
-const context = {};
-describe("ProtectedPostsFunction", function () {
-  it("returns posts list for user", async () => {
-    const result = await lambdaHandler(event, context);
     expect(result.statusCode).to.equal(200);
     let response = JSON.parse(result.body);
     expect(response).to.be.an("array");
     // Optionally check post objects
-  });
+
 });
-```
+});
+
+````
 
 ---
 
@@ -633,7 +580,7 @@ describe("ProtectedPostsFunction", function () {
 ```zsh
 # Starts the local API on http://127.0.0.1:3000
 sam local start-api
-```
+````
 
 ## Troubleshooting tips
 

@@ -177,4 +177,7 @@ Temporary Items
 
 **/.aws-sam
 
+# Archived/deprecated code kept outside active deployment
+.deadcode/
+
 # End of https://www.toptal.com/developers/gitignore/api/osx,sam,node

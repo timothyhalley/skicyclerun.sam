@@ -10,15 +10,43 @@ Globals:
     Environment:
       Variables:
         ALLOWED_ORIGINS: { Ref: AllowedOrigins }
-    
 
 Parameters:
   UserPoolArn:
     Type: String
     Description: ARN of the Cognito User Pool for authorizing protected routes
+  CognitoCustomSenderKmsKeyArn:
+    Type: String
+    Description: KMS key ARN used by Cognito to encrypt custom sender auth codes
+  NotifyConfigurationId:
+    Type: String
+    Description: AWS End User Messaging Notify configuration ID for SMS delivery
+  NotifyTemplateDefaultId:
+    Type: String
+    Description: Default Notify template ID used when trigger source is not explicitly mapped
+  NotifyTemplateSignUpId:
+    Type: String
+    Default: ""
+    Description: Notify template ID for sign-up and resend code (optional)
+  NotifyTemplateForgotPasswordId:
+    Type: String
+    Default: ""
+    Description: Notify template ID for forgot password (optional)
+  NotifyTemplateAuthenticationId:
+    Type: String
+    Default: ""
+    Description: Notify template ID for authentication/MFA (optional)
+  NotifyBrandName:
+    Type: String
+    Default: skicyclerun
+    Description: Brand value injected into Notify template variables
+  NotifyCodeTtlMinutes:
+    Type: Number
+    Default: 5
+    Description: Code validity in minutes injected into Notify template variables
   AllowedOrigins:
     Type: String
-    Default: 'https://skicyclerun.com,https://dev.skicyclerun.com,http://localhost:4321,https://localhost:4321'
+    Default: "https://skicyclerun.com,https://dev.skicyclerun.com,http://localhost:4321,https://localhost:4321"
     Description: Comma-separated list of allowed origins for CORS
   ProtectedContentBucket:
     Type: String
@@ -29,12 +57,11 @@ Parameters:
     Description: Existing IAM Role ARN for Lambda functions (if provided, SAM Policies are ignored)
 
 Resources:
-
   # CloudFront Function for URI rewriting (pretty URLs)
   UriRewriteFunction:
     Type: AWS::CloudFront::Function
     Properties:
-      Name: skicyclerun-uri-rewrite
+      Name: !Sub "${AWS::StackName}-uri-rewrite"
       AutoPublish: true
       FunctionCode: |
         function handler(event) {
@@ -263,7 +290,7 @@ Resources:
       CodeUri: Profile/
       Handler: app.lambdaHandler
       Policies:
-        - Version: '2012-10-17'
+        - Version: "2012-10-17"
           Statement:
             - Effect: Allow
               Action:
@@ -291,79 +318,16 @@ Resources:
       MemorySize: 512
       Timeout: 10
 
-  ProtectedPostsFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: ProtectedPosts/
-      Handler: app.lambdaHandler
-      Policies:
-        - DynamoDBReadPolicy:
-            TableName: { Ref: ProtectedPostsTable }
-        - S3ReadPolicy:
-            BucketName: { Ref: ProtectedContentBucket }
-      Environment:
-        Variables:
-          ALLOWED_ORIGINS: { Ref: AllowedOrigins }
-          PROTECTED_BUCKET: { Ref: ProtectedContentBucket }
-          PROTECTED_POSTS_TABLE: { Ref: ProtectedPostsTable }
-      Events:
-        List:
-          Type: Api
-          Properties:
-            Path: /protected/posts
-            Method: get
-            RestApiId: { Ref: PublicApi }
-            Auth:
-              Authorizer: CognitoAuthorizer
-        Detail:
-          Type: Api
-          Properties:
-            Path: /protected/posts/{slug}
-            Method: get
-            RestApiId: { Ref: PublicApi }
-            Auth:
-              Authorizer: CognitoAuthorizer
-        ListOptions:
-          Type: Api
-          Properties:
-            Path: /protected/posts
-            Method: options
-            RestApiId: { Ref: PublicApi }
-        DetailOptions:
-          Type: Api
-          Properties:
-            Path: /protected/posts/{slug}
-            Method: options
-            RestApiId: { Ref: PublicApi }
-      MemorySize: 1024
-      Timeout: 20
-
-  ProtectedPostsTable:
-    Type: AWS::DynamoDB::Table
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
-    Properties:
-      BillingMode: PAY_PER_REQUEST
-      AttributeDefinitions:
-        - AttributeName: slug
-          AttributeType: S
-      KeySchema:
-        - AttributeName: slug
-          KeyType: HASH
-      SSESpecification:
-        SSEEnabled: true
-
-
 Outputs:
   PublicApiBaseUrl:
     Description: Base URL for the public API
     Value:
-      Fn::Sub: 'https://${PublicApi}.execute-api.${AWS::Region}.amazonaws.com/Prod'
+      Fn::Sub: "https://${PublicApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
     Export:
-      Name: PublicApiBaseUrl
+      Name: !Sub "${AWS::StackName}-PublicApiBaseUrl"
 
   UriRewriteFunctionArn:
     Description: ARN of the CloudFront URI rewrite function
     Value: !GetAtt UriRewriteFunction.FunctionMetadata.FunctionARN
     Export:
-      Name: UriRewriteFunctionArn
+      Name: !Sub "${AWS::StackName}-UriRewriteFunctionArn"

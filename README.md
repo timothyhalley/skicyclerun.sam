@@ -117,6 +117,101 @@ sam deploy --profile skicyclerun_prd
 
 Deployment settings are saved in `samconfig.toml` (stack name: `skicyclerunAPI-v2`, region: `us-west-2`).
 
+## Cognito Custom SMS Sender (Notify)
+
+This stack includes `CustomSmsSenderFunction`, a Lambda for Cognito custom sender flows using AWS End User Messaging Notify.
+
+Supported Cognito trigger sources:
+
+- `CustomSMSSender_SignUp`
+- `CustomSMSSender_ResendCode`
+- `CustomSMSSender_ForgotPassword`
+- `CustomSMSSender_Authentication`
+
+### Required SAM parameters
+
+- `CognitoCustomSenderKmsKeyArn`: KMS key ARN used by Cognito to encrypt auth codes for custom sender triggers.
+- `NotifyConfigurationId`: Notify configuration ID used to send SMS.
+- `NotifyTemplateDefaultId`: Default Notify template.
+
+### What to enter for each prompt
+
+When `sam deploy --guided` asks these values, use:
+
+- `CognitoCustomSenderKmsKeyArn`: Full ARN of the KMS key configured for Cognito custom sender encryption.
+  - Format: `arn:aws:kms:us-west-2:ACCOUNT_ID:key/KEY_ID`
+- `NotifyConfigurationId`: The Notify configuration ID from AWS End User Messaging (SMS).
+  - Format: usually a UUID-like ID.
+- `NotifyTemplateDefaultId`: Template ID in Notify used as fallback for any trigger source.
+  - Format: usually a UUID-like ID.
+- `NotifyTemplateSignUpId` (optional): Template ID for sign-up + resend code. Press Enter to leave blank.
+- `NotifyTemplateForgotPasswordId` (optional): Template ID for forgot-password flow. Press Enter to leave blank.
+- `NotifyTemplateAuthenticationId` (optional): Template ID for auth/MFA flow. Press Enter to leave blank.
+
+If optional template IDs are blank, the Lambda uses `NotifyTemplateDefaultId`.
+
+### Where to find the values
+
+KMS key ARN (for Cognito custom sender):
+
+1. Open Cognito User Pools -> your pool -> Messaging/Lambda triggers.
+2. Find Custom sender encryption key.
+3. Copy the full KMS key ARN.
+
+Notify configuration and template IDs:
+
+1. Open AWS End User Messaging -> SMS and voice -> Notify.
+2. Open your Notify configuration and copy `Configuration ID`.
+3. Open Templates and copy the template IDs you want to use per flow.
+
+CLI helpers (optional):
+
+```bash
+# KMS key ARNs in region
+aws kms list-keys --region us-west-2 --profile skicyclerun_prd
+
+# Get full ARN/details for a key ID
+aws kms describe-key --key-id <KEY_ID_OR_ARN> --region us-west-2 --profile skicyclerun_prd
+```
+
+Optional per-flow template IDs:
+
+- `NotifyTemplateSignUpId`
+- `NotifyTemplateForgotPasswordId`
+- `NotifyTemplateAuthenticationId`
+
+Additional options:
+
+- `NotifyBrandName` (default: `skicyclerun`)
+- `NotifyCodeTtlMinutes` (default: `5`)
+
+### Deploy example
+
+```bash
+sam build --cached
+sam deploy --profile skicyclerun_prd \
+  --parameter-overrides \
+    ProtectedContentBucket=skicyclerun.lib \
+    UserPoolArn=arn:aws:cognito-idp:us-west-2:635874589224:userpool/us-west-2_7HUQj1VTG \
+    CognitoCustomSenderKmsKeyArn=arn:aws:kms:us-west-2:635874589224:key/REPLACE_ME \
+    NotifyConfigurationId=REPLACE_ME \
+    NotifyTemplateDefaultId=REPLACE_ME \
+    NotifyTemplateSignUpId=REPLACE_ME \
+    NotifyTemplateForgotPasswordId=REPLACE_ME \
+    NotifyTemplateAuthenticationId=REPLACE_ME
+```
+
+### Attach Lambda to your Cognito User Pool
+
+Because your user pool is external to this SAM stack, configure it after deployment:
+
+1. In Cognito User Pool, open Messaging or Lambda triggers settings.
+2. Set Custom SMS sender to the deployed `CustomSmsSenderFunction` ARN.
+3. Set Lambda version to `V1_0` for custom sender triggers.
+4. Ensure the same KMS key ARN is configured for the custom sender encryption key.
+
+After this is configured, Cognito will continue to generate and validate codes while your Lambda handles SMS delivery through Notify.
+
 ## API endpoints (clean and small)
 
 Public:
@@ -133,7 +228,6 @@ Authenticated (Cognito User Pool Authorizer, Authorization: Bearer `<ID token>`)
 Storage:
 
 - S3 bucket stores protected content bodies (Markdown/HTML), keyed by slug.
-- DynamoDB table ProtectedPosts with items: { slug (PK), title, summary, requiredGroups (string set/array), s3Key }.
 
 CORS:
 
