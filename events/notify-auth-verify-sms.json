@@ -1,0 +1,17 @@
+{
+  "version": "2.0",
+  "routeKey": "POST /v2/auth/verify-otp",
+  "rawPath": "/v2/auth/verify-otp",
+  "rawQueryString": "",
+  "headers": {
+    "content-type": "application/json"
+  },
+  "requestContext": {
+    "http": {
+      "method": "POST",
+      "path": "/v2/auth/verify-otp"
+    }
+  },
+  "body": "{\"username\":\"+12065550100\",\"session\":\"REPLACE_WITH_SESSION\",\"challengeName\":\"SMS_OTP\",\"code\":\"123456\"}",
+  "isBase64Encoded": false
+}

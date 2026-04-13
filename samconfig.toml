@@ -17,10 +17,9 @@ lint = true
 [default.deploy.parameters]
 capabilities = "CAPABILITY_IAM"
 confirm_changeset = true
-resolve_s3 = true
 s3_prefix = "skicyclerunAPI-v3"
 s3_bucket = "skicyclerun.sam"
-parameter_overrides = "UserPoolArn=\"arn:aws:cognito-idp:us-west-2:635874589224:userpool/us-west-2_7HUQj1VTG\" CognitoCustomSenderKmsKeyArn=\"arn:aws:kms:us-west-2:635874589224:key/f2f8c135-fb1a-46ca-ab97-118b68e457c9\" NotifyConfigurationId=\"notify-96a1d17ccf3c4a408504252774c9ff6e\" NotifyTemplateDefaultId=\"notify-code-verification-english-001\" NotifyTemplateSignUpId=\"notify-code-verification-english-001\" NotifyTemplateForgotPasswordId=\"\" NotifyTemplateAuthenticationId=\"\" NotifyBrandName=\"skicyclerun\" NotifyCodeTtlMinutes=\"5\" AllowedOrigins=\"https://skicyclerun.com,https://dev.skicyclerun.com,http://localhost:4321,https://localhost:4321\" ProtectedContentBucket=\"skicyclerun.lib\" FunctionRoleArn=\"arn:aws:iam::635874589224:role/service-role/skicyclerun_www_lambda_apex_role\""
+parameter_overrides = "UserPoolArn=\"arn:aws:cognito-idp:us-west-2:635874589224:userpool/us-west-2_7HUQj1VTG\" UserPoolClientId=\"1grqv0uqbgis5ecj7f6608r1i1\" AllowedOrigins=\"https://skicyclerun.com,https://dev.skicyclerun.com,http://localhost:4321,https://localhost:4321\" ProtectedContentBucket=\"skicyclerun.lib\""
 profile = "skicyclerun_prd"
 image_repositories = []
 stack_name = "skicyclerunAPI-v3"

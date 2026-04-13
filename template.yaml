@@ -15,35 +15,9 @@ Parameters:
   UserPoolArn:
     Type: String
     Description: ARN of the Cognito User Pool for authorizing protected routes
-  CognitoCustomSenderKmsKeyArn:
+  UserPoolClientId:
     Type: String
-    Description: KMS key ARN used by Cognito to encrypt custom sender auth codes
-  NotifyConfigurationId:
-    Type: String
-    Description: AWS End User Messaging Notify configuration ID for SMS delivery
-  NotifyTemplateDefaultId:
-    Type: String
-    Description: Default Notify template ID used when trigger source is not explicitly mapped
-  NotifyTemplateSignUpId:
-    Type: String
-    Default: ""
-    Description: Notify template ID for sign-up and resend code (optional)
-  NotifyTemplateForgotPasswordId:
-    Type: String
-    Default: ""
-    Description: Notify template ID for forgot password (optional)
-  NotifyTemplateAuthenticationId:
-    Type: String
-    Default: ""
-    Description: Notify template ID for authentication/MFA (optional)
-  NotifyBrandName:
-    Type: String
-    Default: skicyclerun
-    Description: Brand value injected into Notify template variables
-  NotifyCodeTtlMinutes:
-    Type: Number
-    Default: 5
-    Description: Code validity in minutes injected into Notify template variables
+    Description: Cognito User Pool App Client ID for USER_AUTH passwordless flow
   AllowedOrigins:
     Type: String
     Default: "https://skicyclerun.com,https://dev.skicyclerun.com,http://localhost:4321,https://localhost:4321"
@@ -51,10 +25,6 @@ Parameters:
   ProtectedContentBucket:
     Type: String
     Description: S3 bucket name that stores protected post bodies
-  FunctionRoleArn:
-    Type: String
-    Default: arn:aws:iam::635874589224:role/service-role/skicyclerun_www_lambda_apex_role
-    Description: Existing IAM Role ARN for Lambda functions (if provided, SAM Policies are ignored)
 
 Resources:
   # CloudFront Function for URI rewriting (pretty URLs)
@@ -317,6 +287,51 @@ Resources:
             RestApiId: { Ref: PublicApi }
       MemorySize: 512
       Timeout: 10
+
+  # Cognito-native passwordless auth handler
+  NotifyAuthFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: nodejs20.x
+      CodeUri: notify-auth/
+      Handler: handler.handler
+      MemorySize: 256
+      Timeout: 10
+      Environment:
+        Variables:
+          USER_POOL_CLIENT_ID: { Ref: UserPoolClientId }
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - cognito-idp:InitiateAuth
+                - cognito-idp:RespondToAuthChallenge
+              Resource: { Ref: UserPoolArn }
+      Events:
+        SendOtp:
+          Type: Api
+          Properties:
+            Path: /v2/auth/send-otp
+            Method: post
+            RestApiId: { Ref: PublicApi }
+        SendOtpOptions:
+          Type: Api
+          Properties:
+            Path: /v2/auth/send-otp
+            Method: options
+            RestApiId: { Ref: PublicApi }
+        VerifyOtp:
+          Type: Api
+          Properties:
+            Path: /v2/auth/verify-otp
+            Method: post
+            RestApiId: { Ref: PublicApi }
+        VerifyOtpOptions:
+          Type: Api
+          Properties:
+            Path: /v2/auth/verify-otp
+            Method: options
+            RestApiId: { Ref: PublicApi }
 
 Outputs:
   PublicApiBaseUrl:

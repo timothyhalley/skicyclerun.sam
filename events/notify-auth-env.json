@@ -1,0 +1,6 @@
+{
+  "NotifyAuthFunction": {
+    "USER_POOL_CLIENT_ID": "1grqv0uqbgis5ecj7f6608r1i1",
+    "AWS_REGION": "us-west-2"
+  }
+}
