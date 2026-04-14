@@ -7,6 +7,10 @@ import { SESv2Client, SendEmailCommand } from "@aws-sdk/client-sesv2";
 const REGION = process.env.AWS_REGION || "us-west-2";
 const NOTIFY_CONFIG_ID = process.env.NOTIFY_CONFIGURATION_ID;
 const FROM_EMAIL = process.env.FROM_EMAIL; // Your verified SES email
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
 
 const smsClient = new PinpointSMSVoiceV2Client({ region: REGION });
 const sesClient = new SESv2Client({ region: REGION });
@@ -14,15 +18,29 @@ const sesClient = new SESv2Client({ region: REGION });
 // Simple in-memory OTP storage (use DynamoDB for production)
 const otpStore = new Map();
 
-function json(statusCode, body) {
+function getOriginHeader(event) {
+  const origin = event?.headers?.origin || event?.headers?.Origin;
+  if (!origin) {
+    return ALLOWED_ORIGINS[0] || "https://localhost:4321";
+  }
+  if (ALLOWED_ORIGINS.includes(origin)) {
+    return origin;
+  }
+  return ALLOWED_ORIGINS[0] || "https://localhost:4321";
+}
+
+function json(event, statusCode, body) {
+  const origin = getOriginHeader(event);
   return {
     statusCode,
     headers: {
       "content-type": "application/json",
       "cache-control": "no-store",
-      "access-control-allow-origin": "*",
+      "access-control-allow-origin": origin,
       "access-control-allow-headers": "content-type,authorization",
       "access-control-allow-methods": "OPTIONS,POST",
+      "access-control-allow-credentials": "true",
+      vary: "Origin",
     },
     body: JSON.stringify(body),
   };
@@ -121,8 +139,13 @@ function parseBody(event) {
 }
 
 export const handler = async (event) => {
-  if (event?.requestContext?.http?.method === "OPTIONS") {
-    return json(200, { ok: true });
+  const method =
+    event?.requestContext?.http?.method ||
+    event?.httpMethod ||
+    event?.requestContext?.httpMethod;
+
+  if (method === "OPTIONS") {
+    return json(event, 204, {});
   }
 
   const body = parseBody(event);
@@ -143,7 +166,7 @@ export const handler = async (event) => {
   try {
     if (action === "send") {
       if (!recipient) {
-        return json(400, {
+        return json(event, 400, {
           success: false,
           error: "phoneNumber or email is required",
         });
@@ -156,12 +179,12 @@ export const handler = async (event) => {
         result = await sendSMSOTP(recipient);
       }
 
-      return json(200, result);
+      return json(event, 200, result);
     }
 
     if (action === "verify") {
       if (!recipient || !otp) {
-        return json(400, {
+        return json(event, 400, {
           success: false,
           error: "recipient (phoneNumber or email) and otp are required",
         });
@@ -170,21 +193,21 @@ export const handler = async (event) => {
       const stored = otpStore.get(recipient);
       if (stored && stored.otp === String(otp) && Date.now() < stored.expires) {
         otpStore.delete(recipient);
-        return json(200, { success: true, verified: true });
+        return json(event, 200, { success: true, verified: true });
       }
 
-      return json(400, {
+      return json(event, 400, {
         success: false,
         error: "Invalid or expired OTP",
       });
     }
 
-    return json(400, {
+    return json(event, 400, {
       success: false,
       error: "action must be send or verify",
     });
   } catch (err) {
-    return json(500, {
+    return json(event, 500, {
       success: false,
       error: err?.name || "InternalError",
       message: err?.message || "Unexpected error",

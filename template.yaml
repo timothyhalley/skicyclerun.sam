@@ -329,12 +329,6 @@ Resources:
             Path: /v2/auth/send-otp
             Method: post
             RestApiId: { Ref: PublicApi }
-        SendOtpOptions:
-          Type: Api
-          Properties:
-            Path: /v2/auth/send-otp
-            Method: options
-            RestApiId: { Ref: PublicApi }
         VerifyOtp:
           Type: Api
           Properties:
@@ -345,6 +339,22 @@ Resources:
           Type: Api
           Properties:
             Path: /v2/auth/verify-otp
+            Method: options
+            RestApiId: { Ref: PublicApi }
+
+  SendOtpPreflightFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: nodejs22.x
+      CodeUri: preflight-send-otp/
+      Handler: app.lambdaHandler
+      MemorySize: 128
+      Timeout: 5
+      Events:
+        SendOtpOptions:
+          Type: Api
+          Properties:
+            Path: /v2/auth/send-otp
             Method: options
             RestApiId: { Ref: PublicApi }
 
