@@ -1,6 +1,9 @@
 {
   "NotifyAuthFunction": {
     "USER_POOL_CLIENT_ID": "1grqv0uqbgis5ecj7f6608r1i1",
+    "NOTIFY_CONFIGURATION_ID": "notify-96a1d17ccf3c4a408504252774c9ff6e",
+    "NOTIFY_TEMPLATE_ID": "notify-code-verification-english-001",
+    "FROM_EMAIL": "noreply@skicyclerun.com",
     "AWS_REGION": "us-west-2"
   }
 }

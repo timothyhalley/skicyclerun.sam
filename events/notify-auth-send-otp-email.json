@@ -1,17 +1,15 @@
 {
-  "version": "2.0",
-  "routeKey": "POST /v2/auth/send-otp",
-  "rawPath": "/v2/auth/send-otp",
-  "rawQueryString": "",
+  "resource": "/v2/auth/send-otp",
+  "path": "/v2/auth/send-otp",
+  "httpMethod": "POST",
   "headers": {
     "content-type": "application/json"
   },
   "requestContext": {
-    "http": {
-      "method": "POST",
-      "path": "/v2/auth/send-otp"
-    }
+    "resourcePath": "/v2/auth/send-otp",
+    "httpMethod": "POST",
+    "path": "/Prod/v2/auth/send-otp"
   },
-  "body": "{\"username\":\"skicyclerun@gmail.com\",\"preferredChallenge\":\"EMAIL_OTP\"}",
+  "body": "{\"email\":\"noreply@skicyclerun.com\",\"action\":\"send\"}",
   "isBase64Encoded": false
 }

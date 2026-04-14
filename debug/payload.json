@@ -1,6 +1,6 @@
 {
   "resource": "/v2/auth/send-otp",
-  "path": "/v2/auth/send-otp",
+  "path": "/v2/auth/send-otp", 
   "httpMethod": "POST",
   "headers": {
     "content-type": "application/json"
@@ -10,6 +10,6 @@
     "httpMethod": "POST",
     "path": "/Prod/v2/auth/send-otp"
   },
-  "body": "{\"phoneNumber\":\"+14252958989\"}",
+  "body": "{\"email\":\"noreply@skicyclerun.com\",\"action\":\"send\"}",
   "isBase64Encoded": false
 }

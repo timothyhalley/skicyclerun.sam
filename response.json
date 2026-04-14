@@ -1,0 +1,1 @@
+{"statusCode":200,"headers":{"content-type":"application/json","cache-control":"no-store","access-control-allow-origin":"*","access-control-allow-headers":"content-type,authorization","access-control-allow-methods":"OPTIONS,POST"},"body":"{\"success\":true,\"message\":\"Email OTP sent successfully\"}"}

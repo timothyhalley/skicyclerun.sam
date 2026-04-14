@@ -1,17 +1,15 @@
 {
-  "version": "2.0",
-  "routeKey": "POST /v2/auth/verify-otp",
-  "rawPath": "/v2/auth/verify-otp",
-  "rawQueryString": "",
+  "resource": "/v2/auth/verify-otp",
+  "path": "/v2/auth/verify-otp",
+  "httpMethod": "POST",
   "headers": {
     "content-type": "application/json"
   },
   "requestContext": {
-    "http": {
-      "method": "POST",
-      "path": "/v2/auth/verify-otp"
-    }
+    "resourcePath": "/v2/auth/verify-otp",
+    "httpMethod": "POST",
+    "path": "/Prod/v2/auth/verify-otp"
   },
-  "body": "{\"username\":\"user@example.com\",\"session\":\"REPLACE_WITH_SESSION\",\"challengeName\":\"EMAIL_OTP\",\"code\":\"123456\"}",
+  "body": "{\"email\":\"noreply@skicyclerun.com\",\"code\":\"REPLACE_WITH_CODE\",\"action\":\"verify\"}",
   "isBase64Encoded": false
 }

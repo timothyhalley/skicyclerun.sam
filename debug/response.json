@@ -1,0 +1,1 @@
+{"statusCode":500,"headers":{"content-type":"application/json","cache-control":"no-store","access-control-allow-origin":"*","access-control-allow-headers":"content-type,authorization","access-control-allow-methods":"OPTIONS,POST"},"body":"{\"success\":false,\"error\":\"BadRequestException\",\"message\":\"UnknownError\"}"}
