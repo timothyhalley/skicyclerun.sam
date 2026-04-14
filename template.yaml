@@ -292,7 +292,7 @@ Resources:
   NotifyAuthFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Runtime: nodejs20.x
+      Runtime: nodejs22.x
       CodeUri: notify-auth/
       Handler: handler.handler
       MemorySize: 256
@@ -300,6 +300,8 @@ Resources:
       Environment:
         Variables:
           USER_POOL_CLIENT_ID: { Ref: UserPoolClientId }
+          NOTIFY_CONFIGURATION_ID: notify-96a1d17ccf3c4a408504252774c9ff6e
+          NOTIFY_TEMPLATE_ID: notify-code-verification-english-001
       Policies:
         - Statement:
             - Effect: Allow
@@ -307,6 +309,13 @@ Resources:
                 - cognito-idp:InitiateAuth
                 - cognito-idp:RespondToAuthChallenge
               Resource: { Ref: UserPoolArn }
+            - Effect: Allow
+              Action:
+                - sms-voice:SendTextMessage
+                - sms-voice:SendNotifyTextMessage
+                - sms-voice:DescribeNotifyConfigurations
+                - sms-voice:DescribeNotifyTemplates
+              Resource: "*"
       Events:
         SendOtp:
           Type: Api

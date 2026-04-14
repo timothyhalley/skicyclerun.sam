@@ -1,13 +1,8 @@
 {
   "name": "notify-auth",
   "version": "1.0.0",
-  "description": "Cognito passwordless auth handler",
   "type": "module",
-  "main": "handler.js",
   "dependencies": {
-    "@aws-sdk/client-cognito-identity-provider": "^3.930.0"
-  },
-  "engines": {
-    "node": ">=20.0.0"
+    "@aws-sdk/client-pinpoint-sms-voice-v2": "^3.0.0"
   }
 }
