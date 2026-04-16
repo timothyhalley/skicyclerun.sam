@@ -19,6 +19,12 @@ const err = (origin, code, message) => ({
   body: JSON.stringify({ error: message }),
 });
 
+function getUserAttribute(attributes, name) {
+  if (!Array.isArray(attributes)) return null;
+  const match = attributes.find((item) => item?.Name === name);
+  return match?.Value ?? null;
+}
+
 export const lambdaHandler = async (event) => {
   const origin = event.headers?.origin || event.headers?.Origin;
 
@@ -52,33 +58,55 @@ export const lambdaHandler = async (event) => {
     ? new Date(claims.auth_time * 1000).toISOString()
     : null;
 
-  // Get additional user attributes from Cognito (like UserCreateDate)
+  // Get additional user attributes from Cognito.
   let memberSince = null;
+  let lastUpdatedTime = null;
   let userStatus = null;
+  let profileEmail = email;
+  let phoneNumber = phone;
+  let zoneinfo = zoneInfo;
+  let customLocation = null;
+
   try {
     const command = new AdminGetUserCommand({
       UserPoolId: process.env.USER_POOL_ID || "us-west-2_nkPiRBTSr",
       Username: claims.username || sub,
     });
     const userData = await cognitoClient.send(command);
+
     memberSince = userData.UserCreateDate
       ? userData.UserCreateDate.toISOString()
       : null;
+    lastUpdatedTime = userData.UserLastModifiedDate
+      ? userData.UserLastModifiedDate.toISOString()
+      : null;
     userStatus = userData.UserStatus || null;
+
+    const attrs = userData.UserAttributes || [];
+    profileEmail = getUserAttribute(attrs, "email") || profileEmail;
+    phoneNumber = getUserAttribute(attrs, "phone_number") || phoneNumber;
+    zoneinfo = getUserAttribute(attrs, "zoneinfo") || zoneinfo;
+    customLocation = getUserAttribute(attrs, "custom:location");
   } catch (error) {
     console.error("Failed to fetch user details from Cognito:", error);
-    // Continue without these fields rather than failing the request
+    // Continue without these fields rather than failing the request.
   }
+
+  const emailPopulated = typeof profileEmail === "string" && profileEmail.trim() !== "";
 
   return ok(origin, {
     sub,
-    email,
+    email: profileEmail,
+    emailPopulated,
     emailVerified,
-    phone,
+    phone: phoneNumber,
     phoneVerified,
-    location: zoneInfo,
+    zoneinfo,
+    location: customLocation,
     groups,
     memberSince,
+    createdTime: memberSince,
+    lastUpdatedTime,
     lastLogin: authTime,
     userStatus,
   });

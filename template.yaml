@@ -300,6 +300,7 @@ Resources:
       Environment:
         Variables:
           USER_POOL_CLIENT_ID: { Ref: UserPoolClientId }
+          USER_POOL_ARN: { Ref: UserPoolArn }
           NOTIFY_CONFIGURATION_ID: notify-96a1d17ccf3c4a408504252774c9ff6e
           NOTIFY_TEMPLATE_ID: notify-code-verification-english-001
           FROM_EMAIL: "noreply@skicyclerun.com"
@@ -309,6 +310,9 @@ Resources:
               Action:
                 - cognito-idp:InitiateAuth
                 - cognito-idp:RespondToAuthChallenge
+                - cognito-idp:ListUsers
+                - cognito-idp:AdminGetUser
+                - cognito-idp:AdminListGroupsForUser
               Resource: { Ref: UserPoolArn }
             - Effect: Allow
               Action:
@@ -326,19 +330,19 @@ Resources:
         SendOtp:
           Type: Api
           Properties:
-            Path: /v2/auth/send-otp
+            Path: /auth/send-otp
             Method: post
             RestApiId: { Ref: PublicApi }
         VerifyOtp:
           Type: Api
           Properties:
-            Path: /v2/auth/verify-otp
+            Path: /auth/verify-otp
             Method: post
             RestApiId: { Ref: PublicApi }
         VerifyOtpOptions:
           Type: Api
           Properties:
-            Path: /v2/auth/verify-otp
+            Path: /auth/verify-otp
             Method: options
             RestApiId: { Ref: PublicApi }
 
@@ -354,7 +358,7 @@ Resources:
         SendOtpOptions:
           Type: Api
           Properties:
-            Path: /v2/auth/send-otp
+            Path: /auth/send-otp
             Method: options
             RestApiId: { Ref: PublicApi }
 

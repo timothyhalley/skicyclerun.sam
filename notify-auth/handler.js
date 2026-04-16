@@ -3,10 +3,20 @@ import {
   SendNotifyTextMessageCommand,
 } from "@aws-sdk/client-pinpoint-sms-voice-v2";
 import { SESv2Client, SendEmailCommand } from "@aws-sdk/client-sesv2";
+import {
+  CognitoIdentityProviderClient,
+  AdminGetUserCommand,
+  AdminListGroupsForUserCommand,
+  ListUsersCommand,
+} from "@aws-sdk/client-cognito-identity-provider";
 
 const REGION = process.env.AWS_REGION || "us-west-2";
 const NOTIFY_CONFIG_ID = process.env.NOTIFY_CONFIGURATION_ID;
 const FROM_EMAIL = process.env.FROM_EMAIL; // Your verified SES email
+const USER_POOL_ID =
+  process.env.USER_POOL_ID ||
+  process.env.USER_POOL_ARN?.split("/")?.[1] ||
+  null;
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "")
   .split(",")
   .map((s) => s.trim())
@@ -14,6 +24,7 @@ const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "")
 
 const smsClient = new PinpointSMSVoiceV2Client({ region: REGION });
 const sesClient = new SESv2Client({ region: REGION });
+const cognitoClient = new CognitoIdentityProviderClient({ region: REGION });
 
 // Simple in-memory OTP storage (use DynamoDB for production)
 const otpStore = new Map();
@@ -138,6 +149,86 @@ function parseBody(event) {
   }
 }
 
+function getAttribute(attributes, name) {
+  const found = attributes?.find((attr) => attr?.Name === name);
+  return found?.Value ?? null;
+}
+
+async function findUsernameByRecipient(recipient) {
+  if (!USER_POOL_ID || !recipient) return null;
+
+  const filter = isEmail(recipient)
+    ? `email = \"${recipient}\"`
+    : `phone_number = \"${recipient}\"`;
+
+  const listUsers = await cognitoClient.send(
+    new ListUsersCommand({
+      UserPoolId: USER_POOL_ID,
+      Filter: filter,
+      Limit: 1,
+    }),
+  );
+
+  return listUsers?.Users?.[0]?.Username || recipient;
+}
+
+async function getCognitoUserProfile(recipient) {
+  if (!USER_POOL_ID) {
+    return {
+      lookupWarning: "USER_POOL_ID is not configured",
+    };
+  }
+
+  const username = await findUsernameByRecipient(recipient);
+  if (!username) {
+    return {
+      lookupWarning: "Cognito user not found for recipient",
+    };
+  }
+
+  const [userData, groupData] = await Promise.all([
+    cognitoClient.send(
+      new AdminGetUserCommand({
+        UserPoolId: USER_POOL_ID,
+        Username: username,
+      }),
+    ),
+    cognitoClient.send(
+      new AdminListGroupsForUserCommand({
+        UserPoolId: USER_POOL_ID,
+        Username: username,
+      }),
+    ),
+  ]);
+
+  const attributes = userData?.UserAttributes || [];
+  const email = getAttribute(attributes, "email");
+  const phone = getAttribute(attributes, "phone_number");
+  const zoneinfo = getAttribute(attributes, "zoneinfo");
+  const customLocation = getAttribute(attributes, "custom:location");
+  const name = getAttribute(attributes, "name");
+
+  return {
+    sub: getAttribute(attributes, "sub"),
+    username,
+    name,
+    email,
+    emailPopulated: !!(email && email.trim()),
+    phone,
+    zoneinfo,
+    location: customLocation,
+    groups: (groupData?.Groups || []).map((group) => group?.GroupName).filter(Boolean),
+    createdTime: userData?.UserCreateDate
+      ? userData.UserCreateDate.toISOString()
+      : null,
+    lastUpdatedTime: userData?.UserLastModifiedDate
+      ? userData.UserLastModifiedDate.toISOString()
+      : null,
+    userStatus: userData?.UserStatus || null,
+    enabled: typeof userData?.Enabled === "boolean" ? userData.Enabled : null,
+  };
+}
+
 export const handler = async (event) => {
   const method =
     event?.requestContext?.http?.method ||
@@ -193,7 +284,22 @@ export const handler = async (event) => {
       const stored = otpStore.get(recipient);
       if (stored && stored.otp === String(otp) && Date.now() < stored.expires) {
         otpStore.delete(recipient);
-        return json(event, 200, { success: true, verified: true });
+
+        let profileResponse = {};
+        try {
+          profileResponse = await getCognitoUserProfile(recipient);
+        } catch (profileError) {
+          console.error("Failed to fetch Cognito user profile:", profileError);
+          profileResponse = {
+            lookupWarning: "OTP verified, but failed to fetch Cognito profile",
+          };
+        }
+
+        return json(event, 200, {
+          success: true,
+          verified: true,
+          ...profileResponse,
+        });
       }
 
       return json(event, 400, {
