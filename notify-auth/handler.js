@@ -217,7 +217,9 @@ async function getCognitoUserProfile(recipient) {
     phone,
     zoneinfo,
     location: customLocation,
-    groups: (groupData?.Groups || []).map((group) => group?.GroupName).filter(Boolean),
+    groups: (groupData?.Groups || [])
+      .map((group) => group?.GroupName)
+      .filter(Boolean),
     createdTime: userData?.UserCreateDate
       ? userData.UserCreateDate.toISOString()
       : null,
