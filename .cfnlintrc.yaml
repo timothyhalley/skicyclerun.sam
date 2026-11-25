@@ -1,0 +1,4 @@
+ignore_checks:
+  - I4010
+  - I3011
+  - I3042

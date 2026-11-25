@@ -1,0 +1,134 @@
+# Add these to your Resources: section in template.yaml
+# Place each LogGroup right after its corresponding Function resource
+
+# -----------------------------------------------
+# skicyclerunAPI-v2 stack
+# -----------------------------------------------
+CustomSmsSenderFunctionLogGroup:
+  Type: AWS::Logs::LogGroup
+  Properties:
+    LogGroupName: !Sub "/aws/lambda/${CustomSmsSenderFunction}"
+    RetentionInDays: 7
+
+RandomFunctionLogGroup:
+  Type: AWS::Logs::LogGroup
+  Properties:
+    LogGroupName: !Sub "/aws/lambda/${RandomFunction}"
+    RetentionInDays: 7
+
+GetBucketKeyFunctionLogGroup:
+  Type: AWS::Logs::LogGroup
+  Properties:
+    LogGroupName: !Sub "/aws/lambda/${GetBucketKeyFunction}"
+    RetentionInDays: 7
+
+WelcomeMsgFunctionLogGroup:
+  Type: AWS::Logs::LogGroup
+  Properties:
+    LogGroupName: !Sub "/aws/lambda/${WelcomeMsgFunction}"
+    RetentionInDays: 7
+
+GetAlbumPhotosRNDFunctionLogGroup:
+  Type: AWS::Logs::LogGroup
+  Properties:
+    LogGroupName: !Sub "/aws/lambda/${GetAlbumPhotosRNDFunction}"
+    RetentionInDays: 7
+
+GetAlbumPhotosFunctionLogGroup:
+  Type: AWS::Logs::LogGroup
+  Properties:
+    LogGroupName: !Sub "/aws/lambda/${GetAlbumPhotosFunction}"
+    RetentionInDays: 7
+
+StatusFunctionLogGroup:
+  Type: AWS::Logs::LogGroup
+  Properties:
+    LogGroupName: !Sub "/aws/lambda/${StatusFunction}"
+    RetentionInDays: 7
+
+ProfileFunctionLogGroup:
+  Type: AWS::Logs::LogGroup
+  Properties:
+    LogGroupName: !Sub "/aws/lambda/${ProfileFunction}"
+    RetentionInDays: 7
+
+GetAlbumsFunctionLogGroup:
+  Type: AWS::Logs::LogGroup
+  Properties:
+    LogGroupName: !Sub "/aws/lambda/${GetAlbumsFunction}"
+    RetentionInDays: 7
+
+EchoEchoFunctionLogGroup:
+  Type: AWS::Logs::LogGroup
+  Properties:
+    LogGroupName: !Sub "/aws/lambda/${EchoEchoFunction}"
+    RetentionInDays: 7
+
+# -----------------------------------------------
+# skicyclerunAPI-v3 stack
+# -----------------------------------------------
+RandomFunctionLogGroup:
+  Type: AWS::Logs::LogGroup
+  Properties:
+    LogGroupName: !Sub "/aws/lambda/${RandomFunction}"
+    RetentionInDays: 7
+
+GetAlbumsFunctionLogGroup:
+  Type: AWS::Logs::LogGroup
+  Properties:
+    LogGroupName: !Sub "/aws/lambda/${GetAlbumsFunction}"
+    RetentionInDays: 7
+
+SendOtpPreflightFunctionLogGroup:
+  Type: AWS::Logs::LogGroup
+  Properties:
+    LogGroupName: !Sub "/aws/lambda/${SendOtpPreflightFunction}"
+    RetentionInDays: 7
+
+EchoEchoFunctionLogGroup:
+  Type: AWS::Logs::LogGroup
+  Properties:
+    LogGroupName: !Sub "/aws/lambda/${EchoEchoFunction}"
+    RetentionInDays: 7
+
+StatusFunctionLogGroup:
+  Type: AWS::Logs::LogGroup
+  Properties:
+    LogGroupName: !Sub "/aws/lambda/${StatusFunction}"
+    RetentionInDays: 7
+
+NotifyAuthFunctionLogGroup:
+  Type: AWS::Logs::LogGroup
+  Properties:
+    LogGroupName: !Sub "/aws/lambda/${NotifyAuthFunction}"
+    RetentionInDays: 7
+
+GetAlbumPhotosRNDFunctionLogGroup:
+  Type: AWS::Logs::LogGroup
+  Properties:
+    LogGroupName: !Sub "/aws/lambda/${GetAlbumPhotosRNDFunction}"
+    RetentionInDays: 7
+
+WelcomeMsgFunctionLogGroup:
+  Type: AWS::Logs::LogGroup
+  Properties:
+    LogGroupName: !Sub "/aws/lambda/${WelcomeMsgFunction}"
+    RetentionInDays: 7
+
+GetBucketKeyFunctionLogGroup:
+  Type: AWS::Logs::LogGroup
+  Properties:
+    LogGroupName: !Sub "/aws/lambda/${GetBucketKeyFunction}"
+    RetentionInDays: 7
+
+GetAlbumPhotosFunctionLogGroup:
+  Type: AWS::Logs::LogGroup
+  Properties:
+    LogGroupName: !Sub "/aws/lambda/${GetAlbumPhotosFunction}"
+    RetentionInDays: 7
+
+ProfileFunctionLogGroup:
+  Type: AWS::Logs::LogGroup
+  Properties:
+    LogGroupName: !Sub "/aws/lambda/${ProfileFunction}"
+    RetentionInDays: 7

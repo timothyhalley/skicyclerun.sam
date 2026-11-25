@@ -2,6 +2,16 @@ AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: |
   skicyclerunAPI: function library
+Metadata:
+  com:
+    aws:
+      cloudformation:
+        Context:
+          arch: >-
+            API Gateway routes public and Cognito-authorized requests to Lambda
+            functions. Handlers read protected content from S3; the auth handler
+            integrates with Cognito and sends verification messages through SMS
+            and SES. A CloudFront Function rewrites pretty URLs to index.html.
 Globals:
   Function:
     Timeout: 3
@@ -10,6 +20,10 @@ Globals:
     Environment:
       Variables:
         ALLOWED_ORIGINS: { Ref: AllowedOrigins }
+    LoggingConfig:
+      LogFormat: JSON
+      ApplicationLogLevel: ERROR
+      SystemLogLevel: WARN
 
 Parameters:
   UserPoolArn:
@@ -90,6 +104,14 @@ Resources:
       MemorySize: 3008
       Timeout: 30
 
+  EchoEchoFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${EchoEchoFunction}"
+      RetentionInDays: 3
+
   WelcomeMsgFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -112,6 +134,14 @@ Resources:
       MemorySize: 3008
       Timeout: 30
 
+  WelcomeMsgFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${WelcomeMsgFunction}"
+      RetentionInDays: 3
+
   RandomFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -133,6 +163,14 @@ Resources:
             RestApiId: { Ref: PublicApi }
       MemorySize: 3008
       Timeout: 30
+
+  RandomFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${RandomFunction}"
+      RetentionInDays: 3
 
   GetBucketKeyFunction:
     Type: AWS::Serverless::Function
@@ -158,6 +196,14 @@ Resources:
       MemorySize: 3008
       Timeout: 30
 
+  GetBucketKeyFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${GetBucketKeyFunction}"
+      RetentionInDays: 3
+
   GetAlbumsFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -181,6 +227,14 @@ Resources:
             RestApiId: { Ref: PublicApi }
       MemorySize: 3008
       Timeout: 30
+
+  GetAlbumsFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${GetAlbumsFunction}"
+      RetentionInDays: 3
 
   GetAlbumPhotosFunction:
     Type: AWS::Serverless::Function
@@ -206,6 +260,14 @@ Resources:
       MemorySize: 3008
       Timeout: 30
 
+  GetAlbumPhotosFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${GetAlbumPhotosFunction}"
+      RetentionInDays: 3
+
   GetAlbumPhotosRNDFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -230,6 +292,14 @@ Resources:
       MemorySize: 3008
       Timeout: 30
 
+  GetAlbumPhotosRNDFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${GetAlbumPhotosRNDFunction}"
+      RetentionInDays: 3
+
   StatusFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -253,6 +323,14 @@ Resources:
             RestApiId: { Ref: PublicApi }
       MemorySize: 512
       Timeout: 10
+
+  StatusFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${StatusFunction}"
+      RetentionInDays: 3
 
   ProfileFunction:
     Type: AWS::Serverless::Function
@@ -287,6 +365,14 @@ Resources:
             RestApiId: { Ref: PublicApi }
       MemorySize: 512
       Timeout: 10
+
+  ProfileFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${ProfileFunction}"
+      RetentionInDays: 3
 
   # Cognito-native passwordless auth handler
   NotifyAuthFunction:
@@ -346,6 +432,14 @@ Resources:
             Method: options
             RestApiId: { Ref: PublicApi }
 
+  NotifyAuthFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${NotifyAuthFunction}"
+      RetentionInDays: 3
+
   SendOtpPreflightFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -361,6 +455,14 @@ Resources:
             Path: /auth/send-otp
             Method: options
             RestApiId: { Ref: PublicApi }
+
+  SendOtpPreflightFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${SendOtpPreflightFunction}"
+      RetentionInDays: 3
 
 Outputs:
   PublicApiBaseUrl:
